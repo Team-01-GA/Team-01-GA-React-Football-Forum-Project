@@ -35,6 +35,7 @@ export default function CreatePost() {
         try {
             await addPost(userData.handle, fields.title, fields.content);
             setFields({ title: '', content: '' });
+            alert('Post created successfully!');
         } catch (error) {
             console.error('Error creating post:', error);
             alert('Failed to create post. Please try again.');
