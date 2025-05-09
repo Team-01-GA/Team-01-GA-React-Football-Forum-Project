@@ -8,7 +8,7 @@ import { getUserData } from './services/user.service';
 import Header from './Components/Header/Header';
 import AuthGate from './views/AuthGate/AuthGate';
 import HomePage from './views/HomePage/HomePage';
-
+import CreatePost from './views/CreatePost/CreatePost';
 
 function App() {
     const [appState, setAppState] = useState({
@@ -48,19 +48,20 @@ function App() {
 
     return (
         <>
-            <AppContext.Provider value={{...appState, setContext: setAppState}}>
+            <AppContext.Provider value={{ ...appState, setContext: setAppState }}>
                 <BrowserRouter>
                     <Header />
                     <Routes>
-                        {!appState.user && 
+                        {!appState.user &&
                             <>
-                                <Route path='/auth-gate' element={<AuthGate />}/>
-                                <Route path='*' element={<HomePage />}/>
+                                <Route path='/auth-gate' element={<AuthGate />} />
+                                <Route path='*' element={<HomePage />} />
                             </>
                         }
-                        {appState.user && 
+                        {appState.user &&
                             <>
-                                <Route path='*' element={<HomePage />}/>
+                                <Route path="/create-post" element={<CreatePost />} />
+                                <Route path='*' element={<HomePage />} />
                             </>
                         }
                     </Routes>
