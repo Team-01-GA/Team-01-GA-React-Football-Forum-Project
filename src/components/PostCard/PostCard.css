@@ -1,0 +1,8 @@
+.post-card {
+  flex: 1 1 300px;
+  max-width: 400px;
+  border: 1px solid red;
+  padding: 16px;
+  margin: 8px;
+  border-radius: 8px;
+}

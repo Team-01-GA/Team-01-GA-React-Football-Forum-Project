@@ -5,10 +5,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './config/firebase-config';
 import { getUserData } from './services/user.service';
-import Header from './Components/Header/Header';
+import Header from './components/Header/Header';
 import AuthGate from './views/AuthGate/AuthGate';
 import HomePage from './views/HomePage/HomePage';
 import CreatePost from './views/CreatePost/CreatePost';
+import AllPosts from './views/AllPosts/AllPosts';
 
 function App() {
     const [appState, setAppState] = useState({
@@ -60,7 +61,8 @@ function App() {
                         }
                         {appState.user &&
                             <>
-                                <Route path="/create-post" element={<CreatePost />} />
+                                <Route path='/create-post' element={<CreatePost />} />
+                                <Route path='/all-posts' element={<AllPosts />} />
                                 <Route path='*' element={<HomePage />} />
                             </>
                         }

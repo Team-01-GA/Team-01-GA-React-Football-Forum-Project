@@ -17,6 +17,7 @@ function Header() {
             ) : (
                 <>
                     <button>SearchBar</button>
+                    <NavLink to='/all-posts'>All Posts</NavLink>
                     <NavLink to='/create-post'>+</NavLink>
                     <NavLink>Account</NavLink>
                     <button onClick={() => logoutUser()}>Log Out</button>
