@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import AppContext from './providers/AppContext';
-import { BrowserRouter, Routes } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './config/firebase-config';
 import { getUserData } from './services/user.service';
 import Header from './Components/Header/Header';
+import AuthGate from './views/AuthGate/AuthGate';
+import HomePage from './views/HomePage/HomePage';
 
 
 function App() {
@@ -40,13 +42,27 @@ function App() {
             });
     });
 
+    if (loading) {
+        return <div id='loading'><h1>Loading...</h1></div>;
+    }
+
     return (
         <>
             <AppContext.Provider value={{...appState, setContext: setAppState}}>
                 <BrowserRouter>
                     <Header />
                     <Routes>
-                        
+                        {!appState.user && 
+                            <>
+                                <Route path='/auth-gate' element={<AuthGate />}/>
+                                <Route path='*' element={<HomePage />}/>
+                            </>
+                        }
+                        {appState.user && 
+                            <>
+                                <Route path='*' element={<HomePage />}/>
+                            </>
+                        }
                     </Routes>
                 </BrowserRouter>
             </AppContext.Provider>
