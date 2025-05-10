@@ -3,7 +3,7 @@ import { getAllPosts } from "../../services/posts.service";
 import PostCard from "../../components/PostCard/PostCard";
 import './AllPosts.css';
 
-export default function AllPosts() {
+export default function AllPosts({ category = null }) {
     const [posts, setPosts] = useState([]);
     const [error, setError] = useState(null);
 
@@ -11,7 +11,10 @@ export default function AllPosts() {
         const loadPosts = async () => {
             try {
                 const result = await getAllPosts();
-                setPosts(result);
+                const filtered = category
+                    ? result.filter(post => post.category === category)
+                    : result;
+                setPosts(filtered);
             } catch (err) {
                 console.error("Error loading posts:", err);
                 setError("Failed to load posts.");
@@ -19,13 +22,17 @@ export default function AllPosts() {
         };
 
         loadPosts();
-    }, []);
+    }, [category]);
 
     if (error) return <p>{error}</p>;
 
     return (
         <div>
-            <h2 id="all-posts-heading">All Posts</h2>
+            <h2 id="all-posts-heading">
+                {category === "premier-league" && "Premier League"}
+                {category === "fantasy-premier-league" && "Fantasy Premier League"}
+                {!category && "All Posts"}
+            </h2>
 
             <div className="post-list">
                 {posts.length > 0 ? (

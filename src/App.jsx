@@ -10,6 +10,8 @@ import AuthGate from './views/AuthGate/AuthGate';
 import HomePage from './views/HomePage/HomePage';
 import CreatePost from './views/CreatePost/CreatePost';
 import AllPosts from './views/AllPosts/AllPosts';
+import PremierLeague from './views/PremierLeague/PremierLeague';
+import FantasyPremierLeague from './views/FantasyPremierLeague/FantasyPremierLeague';
 import PostDetails from './views/PostDetails/PostDetails';
 
 function App() {
@@ -64,6 +66,8 @@ function App() {
                             <>
                                 <Route path='/create-post' element={<CreatePost />} />
                                 <Route path='/all-posts' element={<AllPosts />} />
+                                <Route path="/premier-league" element={<PremierLeague />} />
+                                <Route path="/fantasy-premier-league" element={<FantasyPremierLeague />} />
                                 <Route path="/posts/:postId" element={<PostDetails />} />
                                 <Route path='*' element={<HomePage />} />
                             </>

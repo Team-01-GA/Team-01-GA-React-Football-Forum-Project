@@ -7,7 +7,8 @@ export default function CreatePost() {
 
     const [fields, setFields] = useState({
         title: '',
-        content: ''
+        content: '',
+        category: '',
     });
 
     const { userData } = useContext(AppContext)
@@ -24,17 +25,21 @@ export default function CreatePost() {
             return alert('Please fill in all fields');
         }
 
-        if (fields.title.length < 16 || fields.title.length > 64){
+        if (fields.title.length < 16 || fields.title.length > 64) {
             return alert('Title must be between 16 and 64 symbols.')
         }
 
-        if(fields.content.length < 32 || fields.content.length > 8192){
+        if (fields.content.length < 32 || fields.content.length > 8192) {
             return alert('Text content must be between 32 and 8192 symbols.')
         }
 
+        if (!fields.category) {
+            return alert('Please select a category');
+        }
+
         try {
-            await addPost(userData.handle, fields.title, fields.content);
-            setFields({ title: '', content: '' });
+            await addPost(userData.handle, fields.title, fields.content, fields.category);
+            setFields({ title: '', content: '', category: '' });
             alert('Post created successfully!');
         } catch (error) {
             console.error('Error creating post:', error);
@@ -45,10 +50,41 @@ export default function CreatePost() {
     return (
         <>
             <h2>Create Post</h2>
+
             <label htmlFor="title">Title: </label>
-            <input value={fields.title} onChange={e => handleUpdateValue('title', e.target.value)} type="text" name="title" id="title" /> <br /> <br />
+            <input
+                value={fields.title}
+                onChange={e => handleUpdateValue('title', e.target.value)}
+                type="text"
+                name="title"
+                id="title"
+            />
+            <br /><br />
+
+            <label htmlFor="category">Category: </label>
+            <select
+                name="category"
+                id="category"
+                value={fields.category}
+                onChange={e => handleUpdateValue('category', e.target.value)}
+            >
+                <option value="">Select category</option>
+                <option value="premier-league">Premier League</option>
+                <option value="fantasy-premier-league">Fantasy Premier League</option>
+            </select>
+            <br /><br />
+
             <label htmlFor="content">Content: </label>
-            <textarea value={fields.content} onChange={e => handleUpdateValue('content', e.target.value)} name="content" id="content" cols="30" rows="10"></textarea> <br /> <br />
+            <textarea
+                value={fields.content}
+                onChange={e => handleUpdateValue('content', e.target.value)}
+                name="content"
+                id="content"
+                cols="30"
+                rows="10"
+            />
+            <br /><br />
+
             <button onClick={handleCreatePost}>Create</button>
         </>
     );

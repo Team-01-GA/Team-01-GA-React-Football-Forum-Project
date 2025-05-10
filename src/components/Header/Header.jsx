@@ -18,6 +18,8 @@ function Header() {
                 <>
                     <button>SearchBar</button>
                     <NavLink to='/all-posts'>All Posts</NavLink>
+                    <NavLink to="/premier-league">Premier League</NavLink>
+                    <NavLink to="/fantasy-premier-league">Fantasy Premier League</NavLink>
                     <NavLink to='/create-post'>+</NavLink>
                     <NavLink>Account</NavLink>
                     <button onClick={() => logoutUser()}>Log Out</button>
