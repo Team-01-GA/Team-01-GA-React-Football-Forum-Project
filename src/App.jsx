@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './config/firebase-config';
 import { getUserData } from './services/user.service';
-import Header from './components/Header/Header';
+import Header from './Components/Header/Header';
 import AuthGate from './views/AuthGate/AuthGate';
 import HomePage from './views/HomePage/HomePage';
 import CreatePost from './views/CreatePost/CreatePost';
@@ -13,6 +13,8 @@ import AllPosts from './views/AllPosts/AllPosts';
 import PremierLeague from './views/PremierLeague/PremierLeague';
 import FantasyPremierLeague from './views/FantasyPremierLeague/FantasyPremierLeague';
 import PostDetails from './views/PostDetails/PostDetails';
+import AccountPage from './views/AccountPage/AccountPage';
+
 
 function App() {
     const [appState, setAppState] = useState({
@@ -22,9 +24,11 @@ function App() {
 
     const [user, loading, error] = useAuthState(auth);
 
-    if (appState.user !== user) {
-        setAppState({ user });
-    }
+    useEffect(() => {
+        if (appState.user !== user) {
+            setAppState({ user });
+        }
+    }, [user]);
 
     useEffect(() => {
         if (user === null) return;
@@ -35,16 +39,16 @@ function App() {
                     throw new Error('Something went wrong...');
                 }
 
-                setAppState({
-                    ...appState,
+                setAppState(prev => ({
+                    ...prev,
                     userData: snapshot.val()[Object.keys(snapshot.val())[0]],
-                });
+                }));
             })
             .catch(e => {
                 alert(e.message);
                 console.error(e.message);
             });
-    });
+    }, [user]);
 
     if (loading) {
         return <div id='loading'><h1>Loading...</h1></div>;
@@ -69,6 +73,7 @@ function App() {
                                 <Route path="/premier-league" element={<PremierLeague />} />
                                 <Route path="/fantasy-premier-league" element={<FantasyPremierLeague />} />
                                 <Route path="/posts/:postId" element={<PostDetails />} />
+                                <Route path='/account' element={<AccountPage />}/>
                                 <Route path='*' element={<HomePage />} />
                             </>
                         }

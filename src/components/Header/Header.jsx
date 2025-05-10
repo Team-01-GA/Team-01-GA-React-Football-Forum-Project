@@ -21,7 +21,7 @@ function Header() {
                     <NavLink to="/premier-league">Premier League</NavLink>
                     <NavLink to="/fantasy-premier-league">Fantasy Premier League</NavLink>
                     <NavLink to='/create-post'>+</NavLink>
-                    <NavLink>Account</NavLink>
+                    <NavLink to='/account'>Account</NavLink>
                     <button onClick={() => logoutUser()}>Log Out</button>
                 </>
             )}

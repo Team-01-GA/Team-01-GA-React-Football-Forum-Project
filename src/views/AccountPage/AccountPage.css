@@ -1,0 +1,55 @@
+#acc-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: start;
+    width: 100%;
+    margin-top: 50px;
+}
+
+#main-acc-info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    row-gap: 10px;
+    column-gap: 20px;
+}
+
+.greeting {
+    width: 100%;
+    font-size: 3em;
+    margin: 0;
+}
+
+.acc-img-test {
+    height: 50px;
+    width: 50px;
+    background-color: antiquewhite;
+    border-radius: 50px;
+    align-self: center;
+}
+
+.acc-email {
+    font-size: 1.5em;
+    margin: 5px 0;
+}
+
+#acc-content {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.acc-content-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 45%;
+    border: 1px solid white;
+    padding: 20px;
+    border-radius: 15px;
+}

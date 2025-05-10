@@ -1,9 +1,19 @@
 #root {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    max-width: 1500px;
+    justify-self: center;
     min-height: 100vh;
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
+    position: relative;
+}
+
+#loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
 }
