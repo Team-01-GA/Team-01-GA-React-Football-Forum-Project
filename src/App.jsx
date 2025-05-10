@@ -10,6 +10,7 @@ import AuthGate from './views/AuthGate/AuthGate';
 import HomePage from './views/HomePage/HomePage';
 import CreatePost from './views/CreatePost/CreatePost';
 import AllPosts from './views/AllPosts/AllPosts';
+import PostDetails from './views/PostDetails/PostDetails';
 
 function App() {
     const [appState, setAppState] = useState({
@@ -63,6 +64,7 @@ function App() {
                             <>
                                 <Route path='/create-post' element={<CreatePost />} />
                                 <Route path='/all-posts' element={<AllPosts />} />
+                                <Route path="/posts/:postId" element={<PostDetails />} />
                                 <Route path='*' element={<HomePage />} />
                             </>
                         }
