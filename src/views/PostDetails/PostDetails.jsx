@@ -13,6 +13,7 @@ export default function PostDetails() {
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [sortNewestFirst, setSortNewestFirst] = useState(true);
 
   const { userData } = useContext(AppContext);
 
@@ -63,7 +64,7 @@ export default function PostDetails() {
 
   return (
     <div className='post-details'>
-      
+
       <PostCard post={post} />
 
       <div className='comment-form'>
@@ -82,11 +83,19 @@ export default function PostDetails() {
       </div>
 
 
-      <h3>Comments</h3>
+      <div className="comments-header">
+        <h3>Comments</h3>
+        <button onClick={() => setSortNewestFirst(prev => !prev)}>
+          Sort: {sortNewestFirst ? 'Newest First' : 'Oldest First'}
+        </button>
+      </div>
+
       <div className="comments-section">
         {post.comments ? (
-          Object.entries(post.comments)
-            .reverse()
+          (sortNewestFirst
+            ? Object.entries(post.comments).reverse()
+            : Object.entries(post.comments)
+          )
             .map(([commentId, comment]) => (
               <div key={commentId} className="comment">
                 <p><strong>{comment.author}</strong> — {new Date(comment.createdOn).toLocaleString()}</p>
