@@ -1,0 +1,14 @@
+.comments-section{
+    width: 600px;
+}
+
+.comment {
+  margin-bottom: 16px;
+  padding: 8px;
+  background-color: rgb(249, 134, 134);
+  border-radius: 8px;
+}
+
+.comment p {
+  margin: 4px 0;
+}

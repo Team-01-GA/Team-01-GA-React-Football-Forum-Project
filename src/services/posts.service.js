@@ -25,7 +25,11 @@ export const addPost = async (author, title, content, category) => {
     const result = await push(ref(db, 'posts'), post)
     const id = result.key
 
-    await update(ref(db, `posts/${id}`), { id })
+    // await update(ref(db, `posts/${id}`), { id })
+    await update(ref(db), {
+        [`posts/${id}/id`]: id,
+        [`users/${author}/posts/${id}`]: true,
+    });
 }
 
 export const likePost = async (handle, postId) => {
@@ -58,3 +62,23 @@ export const getPostById = async (id) => {
         likedBy: Object.keys(snapshot.val().likedBy || {}),
     }
 }
+
+export const addComment = async (postId, author, content) => {
+    try {
+        const comment = {
+            author,
+            content,
+            createdOn: new Date().toString(),
+        };
+
+        const commentRef = await push(ref(db, `posts/${postId}/comments`), comment);
+        const commentId = commentRef.key;
+
+        await update(ref(db), {
+            [`users/${author}/comments/${commentId}`]: true,
+        });
+    } catch (error) {
+        console.error('Failed to add comment: ', error);
+        throw error;
+    }
+};
