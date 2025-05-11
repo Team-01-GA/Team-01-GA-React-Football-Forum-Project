@@ -36,7 +36,7 @@ function App() {
         getUserData(user.uid)
             .then(snapshot => {
                 if (!snapshot.exists()) {
-                    throw new Error('Something went wrong...');
+                    throw new Error('Error loading user data...');
                 }
 
                 setAppState(prev => ({

@@ -3,17 +3,26 @@ import { db } from '../config/firebase-config.js';
 import { updateEmail } from 'firebase/auth';
 import { auth } from '../config/firebase-config.js';
 
+export const getUserByEmail = (email) => {
+    const usersRef = ref(db, 'users');
+
+    const userQuery = query(usersRef, orderByChild('email'), equalTo(email));
+
+    return get(userQuery);
+};
+
 export const getUserByHandle = (handle) => {
     return get(ref(db, `users/${handle}`));
 };
 
-export const createUserHandle = (handle, uid, email) => {
+export const createUserObject = (firstName, lastName, handle, uid, email) => {
     return set(ref(db, `users/${handle}`), {
-        handle,
         uid,
+        handle,
+        firstName,
+        lastName,
         email,
         createdOn: new Date(),
-        likedTweets: {},
     });
 };
 

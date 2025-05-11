@@ -31,26 +31,31 @@ function AccountPage() {
         greetings[Math.floor(Math.random() * greetings.length)]
     );
 
-    const handleEmailChange = (e) => {
+    const handleEmailChange = async (e) => {
         if (e.key === 'Enter') {
-            if (!e.target.value || !(e.target.value).includes('@') || !(e.target.value).includes('.')) {
+            const normalisedEmail = e.target.value.toLowerCase();
+
+            if (!normalisedEmail || !(normalisedEmail).includes('@') || !(normalisedEmail).includes('.')) {
                 return setEmailError('Please enter a valid email address.');
             }
 
-            updateUserEmail(user.userData.handle, e.target.value)
-                .then(() => {
-                    setContext(prev => ({
-                        ...prev,
-                        userData: {
-                            ...prev.userData,
-                            email: e.target.value,
-                        },
-                    }));
-                })
-                .catch(e => setError(e.message));
+            try {
+                await updateUserEmail(user.userData.handle, normalisedEmail);
 
-            setEditMode(false);
-            alert('Email updated succesfully!');
+                setContext(prev => ({
+                    ...prev,
+                    userData: {
+                        ...prev.userData,
+                        email: normalisedEmail,
+                    },
+                }));
+
+                setEditMode(false);
+                alert('Email updated succesfully!');
+            }
+            catch (e) {
+                setError(e.message);
+            }
         }
     };
 
@@ -73,7 +78,7 @@ function AccountPage() {
 
     if (!user.userData) return null;
 
-    if (error) return <p>{error}</p>;
+    if (error) setEmailError(error);
 
     return (
         <div id="acc-wrapper">
@@ -85,7 +90,7 @@ function AccountPage() {
                     : <input placeholder="New Email" type="email" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} onKeyDown={(e) => handleEmailChange(e)}/>
                 }
                 {emailError && <p>{emailError}</p>}
-                <p className="greeting">{greeting}{user.userData.email}</p>
+                <p className="greeting">{greeting}{user.userData.firstName} {user.userData.lastName}</p>
             </div>
             <div id="acc-content">
                 <div className="acc-content-container">
@@ -96,7 +101,7 @@ function AccountPage() {
                     )}
                 </div>
                 <div className="acc-content-container">
-
+                    
                 </div>
             </div>
         </div>
