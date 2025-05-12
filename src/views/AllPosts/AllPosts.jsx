@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { getAllPosts } from "../../services/posts.service";
 import PostCard from "../../components/PostCard/PostCard";
 import './AllPosts.css';
+import PostRow from "../../components/PostRow/PostRow";
 
 export default function AllPosts({ category = null }) {
     const [posts, setPosts] = useState([]);
     const [error, setError] = useState(null);
+    const [useRowView, setUseRowView] = useState(false);
 
     useEffect(() => {
         const loadPosts = async () => {
@@ -34,9 +36,16 @@ export default function AllPosts({ category = null }) {
                 {!category && "All Posts"}
             </h2>
 
-            <div className="post-list">
+            <button onClick={() => setUseRowView(prev => !prev)}>
+                Change to:<br />{useRowView ? 'Card' : 'Row'}
+            </button>
+
+            <div className={`post-list ${useRowView ? 'row-view' : 'card-view'}`}>
                 {posts.length > 0 ? (
-                    posts.map((post) => <PostCard key={post.id} post={post} preview={true} />)
+                    posts.map((post) => 
+                    useRowView
+                    ? <PostRow key={post.id} post={post} preview={true} />
+                    : <PostCard key={post.id} post={post} preview={true} />)
                 ) : (
                     <p>No posts available.</p>
                 )}
