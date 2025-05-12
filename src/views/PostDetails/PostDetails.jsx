@@ -86,16 +86,18 @@ export default function PostDetails() {
       <div className="comments-header">
         <h3>Comments</h3>
         <button onClick={() => setSortNewestFirst(prev => !prev)}>
-          Sort: {sortNewestFirst ? 'Newest First' : 'Oldest First'}
+          Sort to: {sortNewestFirst ? 'Newest First' : 'Oldest First'}
         </button>
       </div>
 
       <div className="comments-section">
         {post.comments ? (
-          (sortNewestFirst
-            ? Object.entries(post.comments).reverse()
-            : Object.entries(post.comments)
-          )
+          Object.entries(post.comments)
+            .sort(([, a], [, b]) => {
+              return sortNewestFirst
+                ? new Date(b.createdOn) - new Date(a.createdOn)
+                : new Date(a.createdOn) - new Date(b.createdOn);
+            })
             .map(([commentId, comment]) => (
               <div key={commentId} className="comment">
                 <p><strong>{comment.author}</strong> — {new Date(comment.createdOn).toLocaleString()}</p>
