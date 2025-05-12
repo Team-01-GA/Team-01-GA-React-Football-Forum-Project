@@ -82,3 +82,15 @@ export const addComment = async (postId, author, content) => {
         throw error;
     }
 };
+
+export const deleteComment = async (postId, author, commentId) => {
+    try{
+        await update(ref(db), {
+            [`posts/${postId}/comments/${commentId}`]: null,
+            [`users/${author}/comments/${commentId}`]: null,
+        });
+    }catch(error){
+        console.log('Failed to delete comment:', error);
+        throw error;
+    }
+}

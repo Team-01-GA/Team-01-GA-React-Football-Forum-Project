@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getPostById } from '../../services/posts.service';
+import { deleteComment, getPostById } from '../../services/posts.service';
 import PostCard from '../../components/PostCard/PostCard';
 import { useContext } from 'react';
 import AppContext from '../../providers/AppContext';
@@ -59,6 +59,25 @@ export default function PostDetails() {
         }
     };
 
+    const handleDeleteComment = async (commentId) => {
+        const confirm = window.confirm('Are you sure you want to delete this comment?')
+        if(!confirm){
+            return;
+        }
+
+        try{
+            await deleteComment(postId, userData.handle, commentId);
+
+            //refresh on delete
+            const updated = await getPostById(postId);
+            setPost(updated);
+            alert('Comment was deleted successfully!')
+        }catch(error){
+            console.error('Failed to delete comment:', error);
+            alert('Could not delete comment.');
+        }
+    }
+
     return (
         <div className="post-details">
             <PostCard post={post} />
@@ -112,6 +131,11 @@ export default function PostDetails() {
                                 </p>
                                 <p>{comment.content}</p>
                                 <hr />
+                                {(userData.handle === comment.author || userData.isAdmin) && (
+                                    <button onClick={() => handleDeleteComment(commentId)}>
+                                        Delete
+                                    </button>
+                                )}
                             </div>
                         ))
                 ) : (
