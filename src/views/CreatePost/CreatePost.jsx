@@ -47,6 +47,10 @@ export default function CreatePost() {
         }
     }
 
+    if (userData.isBlocked) {
+        return <p>You are blocked. You cannot post.</p>;
+    }
+
     return (
         <>
             <h2>Create Post</h2>

@@ -22,6 +22,8 @@ export const createUserObject = (firstName, lastName, handle, uid, email) => {
         firstName,
         lastName,
         email,
+        isAdmin: false,
+        isBlocked: false,
         createdOn: new Date(),
     });
 };

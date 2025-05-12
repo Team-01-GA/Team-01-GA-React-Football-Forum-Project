@@ -22,6 +22,11 @@
     margin: 0;
 }
 
+.acc-name {
+    font-size: 3em;
+    margin: 0;
+}
+
 .acc-img-test {
     height: 50px;
     width: 50px;
@@ -33,6 +38,21 @@
 .acc-email {
     font-size: 1.5em;
     margin: 5px 0;
+}
+
+#acc-details {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+    gap: 10px;
+}
+
+.acc-detail {
+    background-color: rgba(255, 255, 255, 0.811);
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
 }
 
 #acc-content {

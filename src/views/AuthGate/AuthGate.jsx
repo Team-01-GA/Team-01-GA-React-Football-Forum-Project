@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import './AuthGate.css';
-import Login from './Login';
-import Register from './Register';
-import AuthError from './AuthError';
+import Login from '../../components/Login/Login';
+import Register from '../../components/Register/Register';
+import AuthError from '../../components/AuthError/AuthError';
 
 function AuthGate() {
 

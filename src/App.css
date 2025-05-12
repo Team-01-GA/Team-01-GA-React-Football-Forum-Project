@@ -1,19 +1,22 @@
 #root {
     display: flex;
     flex-direction: column;
-    max-width: 1500px;
+    width: 1500px;
     justify-self: center;
-    min-height: 100vh;
-    height: 100vh;
+    min-height: 80vh;
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
+    margin-top: 100px;
 }
 
-#loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
+#main-app {
+    animation: fadeIn 1s ease 0.5s forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    100% {
+        opacity: 1;
+    }
 }

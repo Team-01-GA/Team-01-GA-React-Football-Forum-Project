@@ -11,17 +11,17 @@ function Header() {
 
     return (
         <div id="header">
-            <h1>React Fantasy Football Forum</h1>
+            <NavLink className='home' to='/'><h1>React Fantasy Football Forum</h1></NavLink>
             {!user.user ? (
-                <button onClick={() => navigate('/auth-gate')}>Login / Register</button>
+                <NavLink to='/auth-gate'>Login / Register</NavLink>
             ) : (
                 <>
-                    <button>SearchBar</button>
-                    <NavLink to='/all-posts'>All Posts</NavLink>
+                    <input name='search' type="text" placeholder='Search'/>
                     <NavLink to="/premier-league">Premier League</NavLink>
                     <NavLink to="/fantasy-premier-league">Fantasy Premier League</NavLink>
-                    <NavLink to='/create-post'>+</NavLink>
-                    <NavLink to='/account'>Account</NavLink>
+                    <div className='divider'></div>
+                    <button className='create-post' onClick={() => navigate('/create-post')}>+</button>
+                    <NavLink to={`/account`}>Account</NavLink>
                     <button onClick={() => logoutUser()}>Log Out</button>
                 </>
             )}

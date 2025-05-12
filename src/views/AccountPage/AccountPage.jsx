@@ -3,7 +3,9 @@ import AppContext from "../../providers/AppContext";
 import './AccountPage.css';
 import { getAllPosts } from "../../services/posts.service";
 import PostRow from "../../components/PostRow/PostRow";
-import { updateUserEmail } from "../../services/user.service";
+import { getUserData, updateUserEmail } from "../../services/user.service";
+import { useNavigate, useParams } from "react-router-dom";
+import Loader from "../../components/Loader/Loader";
 
 function AccountPage() {
 
@@ -14,6 +16,21 @@ function AccountPage() {
     const [editMode, setEditMode] = useState(false);
     const [emailValue, setEmailValue] = useState('');
     const [emailError, setEmailError] = useState(null);
+    const [userToView, setUserToView] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const { userId } = useParams();
+    const currentUserId = userId ? userId : user.user.uid;
+    // console.log(user);
+    const loggedInUser = userId === user.user.uid;
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!userId) {
+            navigate(`/account/${user.user.uid}`, { replace: true });
+        }
+    }, [userId, user, navigate]);
 
     const greetings = [
         'Hey there, ',
@@ -60,11 +77,18 @@ function AccountPage() {
     };
 
     useEffect(() => {
-        if (user.userData) {
+        setLoading(true);
+        if (user) {
             const loadPosts = async () => {
                 try {
+                    const snapshot = await getUserData(currentUserId)
+                    if (!snapshot.exists()) {
+                        throw new Error('User not found.');
+                    }
+                    const [ handle ] = Object.entries(snapshot.val())[0];
+                    setUserToView(Object.entries(snapshot.val())[0][1]);
                     const result = await getAllPosts();
-                    const filtered = result.filter(post => post.author === user.userData.handle);
+                    const filtered = result.filter(post => post.author === handle);
                     setPosts(filtered);
                 } catch (err) {
                     console.error("Error loading posts:", err);
@@ -73,10 +97,11 @@ function AccountPage() {
             };
     
             loadPosts();
+            setLoading(false);
         }
-    }, [user.userData]);
+    }, [user, currentUserId]);
 
-    if (!user.userData) return null;
+    if (loading || !userToView || !user || !posts) return <Loader />;
 
     if (error) setEmailError(error);
 
@@ -84,13 +109,35 @@ function AccountPage() {
         <div id="acc-wrapper">
             <div id="main-acc-info">
                 <div className="acc-img-test"></div>
-                <p className="acc-email">{user.userData.email}</p>
-                {!editMode
-                    ? <button onClick={() => setEditMode(true)}>Edit</button>
-                    : <input placeholder="New Email" type="email" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} onKeyDown={(e) => handleEmailChange(e)}/>
+                {loggedInUser 
+                    ? <>
+                        <p className="acc-email">{user.userData.email}</p>
+                        {!editMode
+                            ? <button onClick={() => setEditMode(true)}>Edit</button>
+                            : <input placeholder="New Email" type="email" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} onKeyDown={(e) => handleEmailChange(e)}/>
+                        }
+                        {emailError && <p>{emailError}</p>}
+                        <p className="greeting">{greeting}{userToView.firstName} {userToView.lastName}</p>
+                    </> 
+                    : <>
+                        <p className="acc-name">{userToView.handle}</p>
+                        {!user.userData.isAdmin
+                            ? ''
+                            : userToView.isAdmin
+                                ? ''
+                                : userToView.isBlocked 
+                                    ? <button>Unblock User</button>
+                                    : <button>Block User</button>
+                        }
+                    </>
                 }
-                {emailError && <p>{emailError}</p>}
-                <p className="greeting">{greeting}{user.userData.firstName} {user.userData.lastName}</p>
+                <div id="acc-details">
+                    <p className="acc-detail">{userToView.isAdmin ? 'Admin' : 'User'}</p>
+                    <p className="acc-detail">Member since:</p>
+                    <p className="acc-detail">Posts:</p>
+                    <p className="acc-detail">Comments:</p>
+                    <p className="acc-detail">Likes:</p>
+                </div>
             </div>
             <div id="acc-content">
                 <div className="acc-content-container">
