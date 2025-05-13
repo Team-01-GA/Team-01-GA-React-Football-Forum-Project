@@ -9,7 +9,14 @@ export const getAllPosts = async (search = '') => {
         return [];
     }
 
-    const posts = Object.values(snapshot.val());
+    // const posts = Object.values(snapshot.val());
+
+    // Normalize to array
+    const posts = Object.entries(snapshot.val()).map(([id, data]) => ({
+        ...data,
+        id,
+        likedBy: Object.keys(data.likedBy || {}), 
+    }));
 
     if (search) {
         return posts.filter(post => post.title.toLowerCase().includes(search.toLowerCase()));
@@ -33,21 +40,40 @@ export const addPost = async (author, title, content, category) => {
 }
 
 export const likePost = async (handle, postId) => {
-    const updatedPost = {
-        [`posts/${postId}/likedBy/${handle}`]: true,
-        [`users/${handle}/likedPosts/${postId}`]: true,
-    }
+    try {
+        const postSnapshot = await get(ref(db, `posts/${postId}`));
+        const currentLikes = postSnapshot.val().likes || 0;
 
-    return update(ref(db), updatedPost);
+        const updatedPost = {
+            [`posts/${postId}/likedBy/${handle}`]: true,
+            [`users/${handle}/likedPosts/${postId}`]: true,
+            [`posts/${postId}/likes`]: currentLikes + 1,
+        }
+
+        await update(ref(db), updatedPost);
+    } catch (error) {
+        console.error('Failed to like post:', error);
+        throw error;
+    }
 }
 
 export const unlikePost = async (handle, postId) => {
-    const updatedPost = {
-        [`posts/${postId}/likedBy/${handle}`]: null,
-        [`users/${handle}/likedPosts/${postId}`]: null,
-    }
+    try {
+        const postSnapshot = await get(ref(db, `posts/${postId}`));
+        const currentLikes = postSnapshot.val().likes || 1;
+        const safeLikes = Math.max(currentLikes - 1, 0);
 
-    return update(ref(db), updatedPost);
+        const updatedPost = {
+            [`posts/${postId}/likedBy/${handle}`]: null,
+            [`users/${handle}/likedPosts/${postId}`]: null,
+            [`posts/${postId}/likes`]: safeLikes,
+        }
+
+        return update(ref(db), updatedPost);
+    } catch (error) {
+        console.error('Failed to unlike post:', error);
+        throw error;
+    }
 }
 
 export const getPostById = async (id) => {
