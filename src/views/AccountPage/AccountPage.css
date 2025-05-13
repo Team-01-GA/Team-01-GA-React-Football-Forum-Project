@@ -16,6 +16,45 @@
     column-gap: 20px;
 }
 
+#main-acc-info button {
+    background-color: rgb(225, 218, 218);
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
+    border: none;
+}
+
+#main-acc-info #block-btn {
+    background-color: rgb(168, 54, 54);
+    color: white;
+    border-radius: 15px;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1em;
+}
+
+.acc-message {
+    margin: 0;
+    font-size: 1em;
+    align-self: center;
+    animation: msgFadeOut 6s ease forwards;
+}
+
+@keyframes msgFadeOut {
+    0% {
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
 .greeting {
     width: 100%;
     font-size: 3em;
@@ -49,7 +88,7 @@
 }
 
 .acc-detail {
-    background-color: rgba(255, 255, 255, 0.811);
+    background-color: rgb(225, 218, 218);
     color: black;
     border-radius: 15px;
     padding: 10px 15px;

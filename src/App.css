@@ -20,3 +20,60 @@
         opacity: 1;
     }
 }
+
+@property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.rotating-border-loading {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.5s ease;
+    z-index: 2;
+    background-color: inherit;
+}
+
+.rotating-border-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    padding: 4px;
+    background-image: conic-gradient(
+        from var(--angle),
+        transparent 13%,
+        #dcdcdc 37.5%,
+        transparent 60%
+    );
+    border-radius: 15px;
+    animation: spinBorder 2s ease infinite;
+    box-sizing: border-box;
+
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    background-clip: border-box;
+}
+
+@keyframes spinBorder {
+    from {
+        --angle: 0deg;
+    }
+    to {
+        --angle: 360deg;
+    }
+}
+
+.glassmorphic-bg {
+  background: rgba(255, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}

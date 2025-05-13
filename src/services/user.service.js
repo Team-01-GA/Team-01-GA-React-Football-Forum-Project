@@ -3,7 +3,7 @@ import { db } from '../config/firebase-config.js';
 import { updateEmail } from 'firebase/auth';
 import { auth } from '../config/firebase-config.js';
 
-export const getUserByEmail = (email) => {
+export const getUserByEmail = async (email) => {
     const usersRef = ref(db, 'users');
 
     const userQuery = query(usersRef, orderByChild('email'), equalTo(email));
@@ -11,11 +11,11 @@ export const getUserByEmail = (email) => {
     return get(userQuery);
 };
 
-export const getUserByHandle = (handle) => {
+export const getUserByHandle = async (handle) => {
     return get(ref(db, `users/${handle}`));
 };
 
-export const createUserObject = (firstName, lastName, handle, uid, email) => {
+export const createUserObject = async (firstName, lastName, handle, uid, email) => {
     return set(ref(db, `users/${handle}`), {
         uid,
         handle,
@@ -28,7 +28,7 @@ export const createUserObject = (firstName, lastName, handle, uid, email) => {
     });
 };
 
-export const updateUserEmail = (handle, newEmail) => {
+export const updateUserEmail = async (handle, newEmail) => {
     const user = auth.currentUser;
 
     if (!user) {
@@ -43,6 +43,10 @@ export const updateUserEmail = (handle, newEmail) => {
         });
 };
 
-export const getUserData = (uid) => {
+export const getUserData = async (uid) => {
     return get(query(ref(db, 'users'), orderByChild('uid'), equalTo(uid)));
 };
+
+export const toggleUserBlock = async (handle, boolean) => {
+   await update(ref(db, `users/${handle}`), { isBlocked: boolean });
+}
