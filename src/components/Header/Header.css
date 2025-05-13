@@ -15,7 +15,7 @@
     /* background-repeat: repeat; */
 }
 
-#header a {
+#header a, #header button {
     padding: 10px 15px;
     border-radius: 15px;
     font-size: 1em;
@@ -56,6 +56,20 @@
     font-size: 2em;
     font-weight: lighter;
     transition: all 0.5s;
+    outline: 4px solid transparent;
+    animation: outlinePulse 4s ease infinite;
+}
+
+@keyframes outlinePulse {
+    0% {
+        outline: 4px solid transparent;
+    }
+    50% {
+        outline: 4px solid red;
+    }
+    100% {
+        outline: 4px solid transparent;
+    }
 }
 
 #header .create-post:hover {

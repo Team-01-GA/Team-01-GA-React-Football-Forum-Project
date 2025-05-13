@@ -22,6 +22,7 @@
     border-radius: 15px;
     padding: 10px 15px;
     border: none;
+    align-self: center;
 }
 
 #main-acc-info #block-btn {
@@ -66,17 +67,29 @@
     margin: 0;
 }
 
-.acc-img-test {
-    height: 50px;
-    width: 50px;
+.acc-img,
+.acc-img-placeholder {
+    height: 70px;
+    width: 70px;
     background-color: antiquewhite;
-    border-radius: 50px;
+    border-radius: 50%;
     align-self: center;
+    align-content: center;
+    justify-items: center;
+    cursor: pointer;
+    background-size: cover;
+
+    & p {
+        margin: 0;
+        font-size: 1.5em;
+        color: rgb(54, 54, 54);
+    }
 }
 
 .acc-email {
     font-size: 1.5em;
     margin: 5px 0;
+    align-self: center;
 }
 
 #acc-details {

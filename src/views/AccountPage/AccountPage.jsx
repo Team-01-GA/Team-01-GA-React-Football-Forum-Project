@@ -4,6 +4,7 @@ import './AccountPage.css';
 import { getAllPosts } from '../../services/posts.service';
 import PostRow from '../../components/PostRow/PostRow';
 import {
+    getProfileImageUrl,
     getUserByHandle,
     getUserData,
     toggleUserBlock,
@@ -11,6 +12,7 @@ import {
 } from '../../services/user.service';
 import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../../components/Loader/Loader';
+import AccountPicture from '../../components/AccountPicture/AccountPicture';
 
 function AccountPage() {
     const user = useContext(AppContext);
@@ -23,7 +25,12 @@ function AccountPage() {
     const [loading, setLoading] = useState(false);
     const [isUserBlocked, setUserBlocked] = useState(false);
     const [stopButton, setStopButton] = useState(false);
-    const [loadingAnim, setLoadingAnim] = useState(false);
+    const [loadingAnim, setLoadingAnim] = useState({
+        accButton: false,
+        posts: false,
+    });
+    const [accImgPicker, setAccImgPicker] = useState(false);
+    const [accPic, setAccPic] = useState(null);
 
     const { userId } = useParams();
     const currentUserId = userId ? userId : user.user.uid;
@@ -36,6 +43,21 @@ function AccountPage() {
             navigate(`/account/${user.user.uid}`, { replace: true });
         }
     }, [userId, user, navigate]);
+
+    useEffect(() => {
+        const getAccPic = async () => {
+            if (loggedInUser) {
+                try {
+                    const url = await getProfileImageUrl();
+                    setAccPic(url);
+                } catch (e) {
+                    console.error(e.message);
+                }
+            }
+        };
+
+        getAccPic();
+    }, [loggedInUser]);
 
     const greetings = [
         'Hey there, ',
@@ -55,7 +77,7 @@ function AccountPage() {
 
     const handleEmailChange = async (e) => {
         if (e.key === 'Enter') {
-            setLoadingAnim(true);
+            setLoadingAnim((prev) => ({ ...prev, accButton: true }));
             setMessage(false);
 
             const normalisedEmail = e.target.value.toLowerCase();
@@ -85,21 +107,23 @@ function AccountPage() {
                 setMessage(e.message);
             }
 
-            setLoadingAnim(false);
+            setLoadingAnim((prev) => ({ ...prev, accButton: false }));
         }
     };
 
     const handleUserBlock = async () => {
         setStopButton(true);
         setMessage(false);
-        setLoadingAnim(true);
+        setLoadingAnim((prev) => ({ ...prev, accButton: true }));
         const newStatus = !isUserBlocked;
 
         let triesLeft = 2;
         const waitingPeriod = 2500;
         const verifyBlockStatus = async () => {
             if (!triesLeft) {
-                throw new Error('Could not verify that the user is blocked. Refresh the page to check if blocked status was applied.');
+                throw new Error(
+                    'Could not verify that the user is blocked. Refresh the page to check if blocked status was applied.'
+                );
             }
             await new Promise((resolve) => setTimeout(resolve, waitingPeriod));
 
@@ -111,25 +135,29 @@ function AccountPage() {
 
             const { isBlocked } = snapshot.val();
             if (isBlocked === newStatus) {
-                setMessage(newStatus ? 'User blocked successfuly.' : 'User pardoned successfuly.');
+                setMessage(
+                    newStatus
+                        ? 'User blocked successfuly.'
+                        : 'User pardoned successfuly.'
+                );
                 setUserBlocked(newStatus);
                 setStopButton(false);
-                return; 
+                return;
             } else {
                 triesLeft--;
                 await verifyBlockStatus();
             }
-        }
+        };
 
         try {
             await toggleUserBlock(userToView.handle, newStatus);
             await verifyBlockStatus();
-        }
-        catch (e) {
+        } catch (e) {
             setMessage(false);
             setMessage(e.message);
         }
-        setLoadingAnim(false);
+
+        setLoadingAnim((prev) => ({ ...prev, accButton: false }));
     };
 
     useEffect(() => {
@@ -167,15 +195,40 @@ function AccountPage() {
 
     return (
         <div id="acc-wrapper">
+            {loggedInUser && accImgPicker && (
+                <AccountPicture
+                    hideImgPicker={setAccImgPicker}
+                    setAccPic={setAccPic}
+                />
+            )}
             <div id="main-acc-info">
-                <div className="acc-img-test"></div>
+                {accPic ? (
+                    <img
+                        onClick={() => setAccImgPicker(true)}
+                        src={accPic}
+                        alt="profile picture"
+                        className="acc-img"
+                    />
+                ) : (
+                    <div
+                        onClick={() => setAccImgPicker(true)}
+                        className="acc-img-placeholder"
+                    >
+                        <p>?</p>
+                    </div>
+                )}
                 {loggedInUser ? (
                     <>
                         <p className="acc-email">{user.userData.email}</p>
                         {!editMode ? (
-                            <button 
-                                className={loadingAnim ? 'rotating-border-loading' : ''}
+                            <button
+                                className={
+                                    loadingAnim.accButton
+                                        ? 'rotating-border-loading'
+                                        : ''
+                                }
                                 onClick={() => setEditMode(true)}
+                                disabled={stopButton}
                             >
                                 Edit
                             </button>
@@ -188,7 +241,7 @@ function AccountPage() {
                                 onKeyDown={(e) => handleEmailChange(e)}
                             />
                         )}
-                        {message && <p className='acc-message'>{message}</p>}
+                        {message && <p className="acc-message">{message}</p>}
                         <p className="greeting">
                             {greeting}
                             {userToView.firstName} {userToView.lastName}
@@ -203,15 +256,19 @@ function AccountPage() {
                             ''
                         ) : (
                             <button
-                                id='block-btn'
-                                className={loadingAnim ? 'rotating-border-loading' : ''}
+                                id="block-btn"
+                                className={
+                                    loadingAnim.accButton
+                                        ? 'rotating-border-loading'
+                                        : ''
+                                }
                                 onClick={() => handleUserBlock()}
                                 disabled={stopButton}
                             >
                                 {isUserBlocked ? `Pardon User` : 'Block User'}
                             </button>
                         )}
-                        {message && <p className='acc-message'>{message}</p>}
+                        {message && <p className="acc-message">{message}</p>}
                     </>
                 )}
                 <div id="acc-details">
