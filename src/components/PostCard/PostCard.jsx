@@ -67,6 +67,8 @@ export default function PostCard({ post, preview = false }) {
         </button>
       )}
 
+      <p><strong>Comments:</strong> {post.commentCount || 0}</p>
+
       <p><em>{new Date(post.createdOn).toLocaleString()}</em></p>
     </div>
   );

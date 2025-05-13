@@ -23,6 +23,7 @@ function PostRow({ post, preview = false }) {
         </p>
   
         <p><strong>Likes:</strong> {post.likes}</p>
+        <p><strong>Comments:</strong> {post.commentCount || 0}</p>
         <p><em>{new Date(post.createdOn).toLocaleString()}</em></p>
       </div>
     );
