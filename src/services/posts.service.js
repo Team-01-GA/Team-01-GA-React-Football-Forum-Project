@@ -71,11 +71,15 @@ export const addComment = async (postId, author, content) => {
             createdOn: new Date().toString(),
         };
 
+        const postSnapshot = await get(ref(db, `posts/${postId}`));
+        const currentCount = postSnapshot.val().commentCount || 0;
+
         const commentRef = await push(ref(db, `posts/${postId}/comments`), comment);
         const commentId = commentRef.key;
 
         await update(ref(db), {
             [`users/${author}/comments/${commentId}`]: true,
+            [`posts/${postId}/commentCount`]: currentCount + 1,
         });
     } catch (error) {
         console.error('Failed to add comment: ', error);
@@ -84,12 +88,18 @@ export const addComment = async (postId, author, content) => {
 };
 
 export const deleteComment = async (postId, author, commentId) => {
-    try{
+    try {
+        const postSnapshot = await get(ref(db, `posts/${postId}`));
+        const currentCount = postSnapshot.val().commentCount || 1;
+
+        const safeCommentCount = Math.max(currentCount - 1, 0);
+
         await update(ref(db), {
             [`posts/${postId}/comments/${commentId}`]: null,
             [`users/${author}/comments/${commentId}`]: null,
+            [`posts/${postId}/commentCount`]: safeCommentCount,
         });
-    }catch(error){
+    } catch (error) {
         console.log('Failed to delete comment:', error);
         throw error;
     }
