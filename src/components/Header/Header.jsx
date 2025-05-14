@@ -1,11 +1,12 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import './Header.css';
 import AppContext from '../../providers/AppContext';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logoutUser } from '../../services/auth.service';
 
-function Header() {
+function Header({ setSearchQuery }) {
     const user = useContext(AppContext);
+    const [input, setInput] = useState('');
 
     const navigate = useNavigate();
 
@@ -16,7 +17,19 @@ function Header() {
                 <NavLink to='/auth-gate'>Login / Register</NavLink>
             ) : (
                 <>
-                    <input name='search' type="text" placeholder='Search'/>
+                    <input
+                        name='search'
+                        type="text"
+                        placeholder='Search by tags or part of the title'
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                setSearchQuery(input.trim().toLowerCase());
+                                setInput('');
+                            }
+                        }}
+                    />
                     <NavLink to="/premier-league">Premier League</NavLink>
                     <NavLink to="/fantasy-premier-league">Fantasy Premier League</NavLink>
                     <div className='divider'></div>

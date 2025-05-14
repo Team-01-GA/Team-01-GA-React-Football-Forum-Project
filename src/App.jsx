@@ -25,6 +25,8 @@ function App() {
 
     const [user, loading, error] = useAuthState(auth);
 
+    const [searchQuery, setSearchQuery] = useState('');
+
     useEffect(() => {
         if (appState.user !== user) {
             setAppState({ user });
@@ -59,7 +61,7 @@ function App() {
         <>
             <AppContext.Provider value={{ ...appState, setContext: setAppState }}>
                 <BrowserRouter>
-                    <Header />
+                    <Header setSearchQuery={setSearchQuery} />
                     <Routes>
                         {!appState.user &&
                             <>
@@ -69,13 +71,13 @@ function App() {
                         }
                         {appState.user &&
                             <>
-                                <Route path='/' element={<AllPosts />} />
+                                <Route path='/' element={<AllPosts searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
                                 <Route path='/create-post' element={<CreatePost />} />
-                                <Route path="/premier-league" element={<PremierLeague />} />
-                                <Route path="/fantasy-premier-league" element={<FantasyPremierLeague />} />
+                                <Route path="/premier-league" element={<PremierLeague searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
+                                <Route path="/fantasy-premier-league" element={<FantasyPremierLeague searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
                                 <Route path="/posts/:postId" element={<PostDetails />} />
-                                <Route path='/account' element={<AccountPage />}/>
-                                <Route path='/account/:userId' element={<AccountPage />}/>
+                                <Route path='/account' element={<AccountPage />} />
+                                <Route path='/account/:userId' element={<AccountPage />} />
                                 <Route path='*' element={<HomePage />} />
                             </>
                         }

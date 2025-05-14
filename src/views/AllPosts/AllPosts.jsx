@@ -3,8 +3,9 @@ import { getAllPosts } from "../../services/posts.service";
 import PostCard from "../../components/PostCard/PostCard";
 import './AllPosts.css';
 import PostRow from "../../components/PostRow/PostRow";
+import { useLocation } from 'react-router-dom';
 
-export default function AllPosts({ category = null }) {
+export default function AllPosts({ category = null, searchQuery = '', setSearchQuery }) {
     const [posts, setPosts] = useState([]);
     const [error, setError] = useState(null);
     const [useRowView, setUseRowView] = useState(false);
@@ -27,6 +28,11 @@ export default function AllPosts({ category = null }) {
         loadPosts();
     }, [category]);
 
+    const location = useLocation();
+    useEffect(() => {
+        setSearchQuery('');
+    }, [location.key]); // clears search on any navigation
+
     if (error) return <p>{error}</p>;
 
     const sortedPosts = [...posts].sort((a, b) => {
@@ -41,6 +47,23 @@ export default function AllPosts({ category = null }) {
 
         return 0;
     });
+
+    const queryWords = searchQuery
+        .trim()
+        .toLowerCase()
+        .split(/\s+/)  // splits by one or more spaces
+        .filter(Boolean); // removes empty strings
+
+    const filteredPosts = queryWords.length > 0
+        ? sortedPosts.filter(post => {
+            const title = post.title?.toLowerCase() || '';
+            const tags = Object.values(post.tags || {}).map(tag => tag.toLowerCase());
+
+            return queryWords.some(word =>
+                title.includes(word) || tags.some(tag => tag.includes(word))
+            );
+        })
+        : sortedPosts;
 
     return (
         <div>
@@ -73,8 +96,8 @@ export default function AllPosts({ category = null }) {
 
 
             <div className={`post-list ${useRowView ? 'row-view' : 'card-view'}`}>
-                {sortedPosts.length > 0 ? (
-                    sortedPosts.map((post) =>
+                {filteredPosts.length > 0 ? (
+                    filteredPosts.map((post) =>
                         useRowView
                             ? <PostRow key={post.id} post={post} preview={true} />
                             : <PostCard key={post.id} post={post} preview={true} />)
