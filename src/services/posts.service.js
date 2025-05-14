@@ -25,9 +25,9 @@ export const getAllPosts = async (search = '') => {
     return posts;
 }
 
-export const addPost = async (author, title, content, category) => {
+export const addPost = async (author, title, content, category, tags) => {
 
-    const post = { author, title, content, category, createdOn: new Date().toString(), likes: 0, comments: {} };
+    const post = { author, title, content, category, tags, createdOn: new Date().toString(), likes: 0, comments: {} };
 
     const result = await push(ref(db, 'posts'), post)
     const id = result.key
