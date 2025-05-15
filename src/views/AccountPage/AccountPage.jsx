@@ -31,6 +31,12 @@ function AccountPage() {
     });
     const [accImgPicker, setAccImgPicker] = useState(false);
     const [accPic, setAccPic] = useState(null);
+    const [accDetails, setAccDetails] = useState({
+        createdOn: null,
+        numberOfPosts: null,
+        numberOfComments: null,
+        numberOfLikes: null,
+    });
 
     const { userId } = useParams();
     const currentUserId = userId ? userId : user.user.uid;
@@ -49,24 +55,34 @@ function AccountPage() {
 
         const setUser = async () => {
             try {
+                setAccPic(null);
                 const snapshot = await getUserData(currentUserId);
                 if (!snapshot.exists()) {
                     throw new Error('User not found.');
                 }
-                setUserToView(Object.entries(snapshot.val())[0][1]);
-            }
-            catch (e) {
+                const user = Object.entries(snapshot.val())[0][1];
+                setUserToView(user);
+
+                setAccDetails({
+                    createdOn: user.createdOn
+                        ? new Date(user.createdOn).toLocaleDateString()
+                        : 'N/A',
+                    numberOfPosts: Object.keys(user.posts ?? {}).length,
+                    numberOfComments: Object.keys(user.comments ?? {}).length,
+                    numberOfLikes: Object.keys(user.likedPosts ?? {}).length,
+                });
+            } catch (e) {
                 console.error('Failed to fetch user', e);
                 setMessage('Failed to fetch user.');
             }
-        }
+        };
 
         setUser();
     }, [currentUserId]);
 
     useEffect(() => {
         const getAccPic = async () => {
-            if (loggedInUser && userToView) {
+            if (userToView) {
                 try {
                     const url = await getProfileImageUrl(userToView.handle);
                     setAccPic(url);
@@ -77,7 +93,7 @@ function AccountPage() {
         };
 
         getAccPic();
-    }, [loggedInUser, userToView]);
+    }, [userToView]);
 
     const greetings = [
         'Hey there, ',
@@ -201,7 +217,7 @@ function AccountPage() {
                 }
                 setLoading(false);
             };
-    
+
             loadPosts();
         }
     }, [userToView, currentUserId]);
@@ -222,12 +238,16 @@ function AccountPage() {
                         onClick={() => setAccImgPicker(true)}
                         src={accPic}
                         alt="profile picture"
-                        className={`acc-img ${!loggedInUser && 'acc-img-inactive'}`}
+                        className={`acc-img ${
+                            !loggedInUser && 'acc-img-inactive'
+                        }`}
                     />
                 ) : (
                     <div
                         onClick={() => setAccImgPicker(true)}
-                        className={`acc-img-placeholder ${!loggedInUser && 'acc-img-inactive'}`}
+                        className={`acc-img-placeholder ${
+                            !loggedInUser && 'acc-img-inactive'
+                        }`}
                     >
                         <p>?</p>
                     </div>
@@ -290,10 +310,10 @@ function AccountPage() {
                     <p className="acc-detail">
                         {userToView.isAdmin ? 'Admin' : 'User'}
                     </p>
-                    <p className="acc-detail">Member since:</p>
-                    <p className="acc-detail">Posts:</p>
-                    <p className="acc-detail">Comments:</p>
-                    <p className="acc-detail">Likes:</p>
+                    <p className="acc-detail">Member since: {accDetails.createdOn}</p>
+                    <p className="acc-detail">Posts: {accDetails.numberOfPosts}</p>
+                    <p className="acc-detail">Comments: {accDetails.numberOfComments}</p>
+                    <p className="acc-detail">Likes: {accDetails.numberOfLikes}</p>
                 </div>
             </div>
             <div id="acc-content">
