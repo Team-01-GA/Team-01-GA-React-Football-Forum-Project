@@ -45,10 +45,30 @@ function AccountPage() {
     }, [userId, user, navigate]);
 
     useEffect(() => {
+        setMessage(false);
+
+        const setUser = async () => {
+            try {
+                const snapshot = await getUserData(currentUserId);
+                if (!snapshot.exists()) {
+                    throw new Error('User not found.');
+                }
+                setUserToView(Object.entries(snapshot.val())[0][1]);
+            }
+            catch (e) {
+                console.error('Failed to fetch user', e);
+                setMessage('Failed to fetch user.');
+            }
+        }
+
+        setUser();
+    }, [currentUserId]);
+
+    useEffect(() => {
         const getAccPic = async () => {
-            if (loggedInUser) {
+            if (loggedInUser && userToView) {
                 try {
-                    const url = await getProfileImageUrl();
+                    const url = await getProfileImageUrl(userToView.handle);
                     setAccPic(url);
                 } catch (e) {
                     console.error(e.message);
@@ -57,7 +77,7 @@ function AccountPage() {
         };
 
         getAccPic();
-    }, [loggedInUser]);
+    }, [loggedInUser, userToView]);
 
     const greetings = [
         'Hey there, ',
@@ -162,34 +182,29 @@ function AccountPage() {
 
     useEffect(() => {
         setLoading(true);
-        if (user) {
-            setMessage(false);
+        setMessage(false);
+
+        if (userToView) {
             const loadPosts = async () => {
                 try {
-                    const snapshot = await getUserData(currentUserId);
-                    if (!snapshot.exists()) {
-                        throw new Error('User not found.');
-                    }
-                    const [handle] = Object.entries(snapshot.val())[0];
-                    setUserToView(Object.entries(snapshot.val())[0][1]);
-                    if (Object.entries(snapshot.val())[0][1].isBlocked) {
+                    if (userToView.isBlocked) {
                         setUserBlocked(true);
                     }
                     const result = await getAllPosts();
                     const filtered = result.filter(
-                        (post) => post.author === handle
+                        (post) => post.author === userToView.handle
                     );
                     setPosts(filtered);
                 } catch (err) {
                     console.error('Error loading posts:', err);
                     setMessage('Failed to load posts.');
                 }
+                setLoading(false);
             };
-
+    
             loadPosts();
-            setLoading(false);
         }
-    }, [user, currentUserId]);
+    }, [userToView, currentUserId]);
 
     if (loading || !userToView || !user || !posts) return <Loader />;
 
@@ -207,12 +222,12 @@ function AccountPage() {
                         onClick={() => setAccImgPicker(true)}
                         src={accPic}
                         alt="profile picture"
-                        className="acc-img"
+                        className={`acc-img ${!loggedInUser && 'acc-img-inactive'}`}
                     />
                 ) : (
                     <div
                         onClick={() => setAccImgPicker(true)}
-                        className="acc-img-placeholder"
+                        className={`acc-img-placeholder ${!loggedInUser && 'acc-img-inactive'}`}
                     >
                         <p>?</p>
                     </div>

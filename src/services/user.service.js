@@ -42,7 +42,7 @@ export const createUserObject = async (
         email,
         isAdmin: false,
         isBlocked: false,
-        createdOn: new Date(),
+        createdOn: Date.now(),
     });
 };
 
@@ -68,25 +68,21 @@ export const toggleUserBlock = async (handle, boolean) => {
     await update(ref(db, `users/${handle}`), { isBlocked: boolean });
 };
 
-export const uploadProfileImage = async (file) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error('User is not authenticated.');
+export const uploadProfileImage = async (handle, file) => {
 
-    const imgLocRef = storageRef(storage, `users/${user.uid}/profile.jpg`);
+    const imgLocRef = storageRef(storage, `users/${handle}/profile.jpg`);
     await uploadBytes(imgLocRef, file);
 
     const url = await getDownloadURL(imgLocRef);
 
-    await set(ref(db, `users/${user.uid}/profileImg`), url);
+    await set(ref(db, `users/${handle}/profileImg`), url);
 
     return url;
 };
 
-export const getProfileImageUrl = async () => {
-    const user = auth.currentUser;
-    if (!user) throw new Error('User not authenticated');
+export const getProfileImageUrl = async (handle) => {
 
-    const snapshot = await get(ref(db, `users/${user.uid}/profileImg`));
+    const snapshot = await get(ref(db, `users/${handle}/profileImg`));
     if (snapshot.exists()) {
         return snapshot.val();
     } else {

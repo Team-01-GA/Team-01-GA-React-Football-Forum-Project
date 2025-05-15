@@ -1,8 +1,12 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
 import './AccountPicture.css';
 import { uploadProfileImage } from '../../services/user.service';
+import AppContext from '../../providers/AppContext';
 
 const AccountPicture = ({ hideImgPicker, setAccPic }) => {
+
+    const { userData } = useContext(AppContext);
+
     const [previewUrl, setPreviewUrl] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -43,7 +47,7 @@ const AccountPicture = ({ hideImgPicker, setAccPic }) => {
         if (selectedFile) {
             setUploading(true);
             try {
-                const url = await uploadProfileImage(selectedFile);
+                const url = await uploadProfileImage(userData.handle, selectedFile);
                 await new Promise((resolve) => setTimeout(resolve, 5000));
                 setMessage('Profile picture uploaded successfuly.');
                 setAccPic(url);
