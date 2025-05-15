@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import './PostCard.css';
 import { useContext, useState } from "react";
 import AppContext from "../../providers/AppContext";
-import { likePost, unlikePost } from "../../services/posts.service";
+import { deletePost, likePost, unlikePost } from "../../services/posts.service";
 
 export default function PostCard({ post, preview = false }) {
   const navigate = useNavigate();
@@ -39,6 +39,20 @@ export default function PostCard({ post, preview = false }) {
       setIsLiking(false);
     }
   }
+
+
+  const handleDeletePost = async () => {
+    const confirm = window.confirm('Are you sure you want to delete this post?');
+    if (!confirm) return;
+
+    try {
+      await deletePost(post.id, post.author);
+      alert('Post deleted successfully!');
+      navigate(-1, { replace: true });
+    } catch (error) {
+      alert('Failed to delete post.', error);
+    }
+  };
 
 
   return (
@@ -84,6 +98,10 @@ export default function PostCard({ post, preview = false }) {
       <p><strong>Comments:</strong> {post.commentCount || 0}</p>
 
       <p><em>{new Date(post.createdOn).toLocaleString()}</em></p>
+
+      {!preview && (userData.isAdmin || userData.handle === post.author) && (
+        <button className='post-delete-button' onClick={handleDeletePost}>Delete Post</button>
+      )}
 
     </div>
   );

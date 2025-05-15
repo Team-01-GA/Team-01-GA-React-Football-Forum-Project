@@ -6,6 +6,7 @@ import { useContext } from 'react';
 import AppContext from '../../providers/AppContext';
 import { addComment } from '../../services/posts.service';
 import './PostDetails.css';
+import Loader from '../../components/Loader/Loader'
 
 export default function PostDetails() {
     const { postId } = useParams();
@@ -32,7 +33,12 @@ export default function PostDetails() {
         fetchPost();
     }, [postId]);
 
-    if (loading) return <p>Loading...</p>;
+    // if (loading) return <p>Loading...</p>;
+    if (loading) return <Loader />
+
+    // if (!post) {
+    //     return <Navigate to="/" replace />;
+    // }
     if (!post) return <p>Post not found.</p>;
 
     const handleAddComment = async () => {
@@ -61,18 +67,18 @@ export default function PostDetails() {
 
     const handleDeleteComment = async (commentId) => {
         const confirm = window.confirm('Are you sure you want to delete this comment?')
-        if(!confirm){
+        if (!confirm) {
             return;
         }
 
-        try{
+        try {
             await deleteComment(postId, userData.handle, commentId);
 
             //refresh on delete
             const updated = await getPostById(postId);
             setPost(updated);
             alert('Comment was deleted successfully!')
-        }catch(error){
+        } catch (error) {
             console.error('Failed to delete comment:', error);
             alert('Could not delete comment.');
         }

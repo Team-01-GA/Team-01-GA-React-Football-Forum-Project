@@ -15,7 +15,7 @@ export const getAllPosts = async (search = '') => {
     const posts = Object.entries(snapshot.val()).map(([id, data]) => ({
         ...data,
         id,
-        likedBy: Object.keys(data.likedBy || {}), 
+        likedBy: Object.keys(data.likedBy || {}),
     }));
 
     if (search) {
@@ -130,3 +130,35 @@ export const deleteComment = async (postId, author, commentId) => {
         throw error;
     }
 }
+
+
+export const deletePost = async (postId, author) => {
+    try {
+        const postSnapshot = await get(ref(db, `posts/${postId}`));
+        if (!postSnapshot.exists()) {
+            throw new Error('Post not found');
+        }
+
+        const post = postSnapshot.val();
+        const updates = {};
+
+        updates[`posts/${postId}`] = null;
+
+        updates[`users/${author}/posts/${postId}`] = null;
+
+        const comments = post.comments || {};
+        for (const [commentId, comment] of Object.entries(comments)) {
+            updates[`users/${comment.author}/comments/${commentId}`] = null;
+        }
+
+        const likedBy = post.likedBy || {};
+        for (const handle of Object.keys(likedBy)) {
+            updates[`users/${handle}/likedPosts/${postId}`] = null;
+        }
+
+        await update(ref(db), updates);
+    } catch (error) {
+        console.error('Failed to delete post:', error);
+        throw error;
+    }
+};
