@@ -7,6 +7,7 @@ import AppContext from '../../providers/AppContext';
 import { addComment } from '../../services/posts.service';
 import './PostDetails.css';
 import Loader from '../../components/Loader/Loader'
+import { editPost } from '../../services/posts.service';
 
 export default function PostDetails() {
     const { postId } = useParams();
@@ -15,6 +16,12 @@ export default function PostDetails() {
     const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [sortNewestFirst, setSortNewestFirst] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editFields, setEditFields] = useState({
+        title: '',
+        content: '',
+        tags: '',
+    });
 
     const { userData } = useContext(AppContext);
 
@@ -23,6 +30,12 @@ export default function PostDetails() {
             try {
                 const data = await getPostById(postId);
                 setPost(data);
+
+                setEditFields({
+                    title: data.title || '',
+                    content: data.content || '',
+                    tags: Object.values(data.tags || {}).join(', '),
+                });
             } catch (err) {
                 console.error('Failed to load post:', err);
             } finally {
@@ -84,9 +97,69 @@ export default function PostDetails() {
         }
     }
 
+    const handleEditPost = async () => {
+        const tagsArray = editFields.tags
+            .split(', ')
+            .map(tag => tag.trim().toLowerCase())
+            .filter(tag => tag.length > 0 && tag.length <= 32);
+
+        if (tagsArray.length < 3) {
+            return alert('Please provide at least three tags, each up to 32 characters.');
+        }
+
+        try {
+            await editPost(postId, editFields.title, editFields.content, tagsArray, userData.handle);
+            alert('Post updated successfully!');
+
+            const updated = await getPostById(postId);
+            setPost(updated);
+            setIsEditing(false);
+        } catch (err) {
+            console.error('Failed to update post:', err);
+            alert('Could not update post.');
+        }
+    };
+
     return (
         <div className="post-details">
-            <PostCard post={post} />
+
+            {!isEditing && (
+                <PostCard
+                    post={post}
+                    onEditClick={
+                        userData.handle === post.author || userData.isAdmin
+                            ? () => setIsEditing(true)
+                            : null
+                    }
+                />
+            )}
+
+            {isEditing && (
+                <div className="edit-form">
+                    <label>Title:</label>
+                    <input
+                        value={editFields.title}
+                        onChange={(e) => setEditFields(prev => ({ ...prev, title: e.target.value }))}
+                    />
+
+                    <label>Content:</label>
+                    <textarea
+                        rows="6"
+                        value={editFields.content}
+                        onChange={(e) => setEditFields(prev => ({ ...prev, content: e.target.value }))}
+                    />
+
+                    <label>Tags (comma and space separated):</label>
+                    <input
+                        value={editFields.tags}
+                        onChange={(e) => setEditFields(prev => ({ ...prev, tags: e.target.value }))}
+                    />
+
+                    <button onClick={handleEditPost}>Save</button>
+                    <button onClick={() => setIsEditing(false)}>Cancel</button>
+                </div>
+            )}
+
 
             {!userData.isBlocked ? (
                 <>

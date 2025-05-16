@@ -50,3 +50,51 @@
   border-radius: 10px;
   cursor: pointer;
 }
+
+.post-edit-button {
+  margin-left: 10px;
+  background-color: rgb(75, 74, 74);
+  border-style: solid;
+  border: none;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+  width: 100%;
+  margin-bottom: 32px;
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.edit-form label {
+  font-weight: bold;
+  color: black;
+}
+
+.edit-form input,
+.edit-form textarea {
+  font-size: 16px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.edit-form button {
+  width: fit-content;
+  padding: 8px 12px;
+  margin-top: 8px;
+}

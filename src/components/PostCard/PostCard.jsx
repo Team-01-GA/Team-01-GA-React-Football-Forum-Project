@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import AppContext from "../../providers/AppContext";
 import { deletePost, likePost, unlikePost } from "../../services/posts.service";
 
-export default function PostCard({ post, preview = false }) {
+export default function PostCard({ post, preview = false, onEditClick = null }) {
   const navigate = useNavigate();
   const { userData } = useContext(AppContext);
   const [liked, setLiked] = useState(post.likedBy?.includes(userData.handle));
@@ -100,7 +100,16 @@ export default function PostCard({ post, preview = false }) {
       <p><em>{new Date(post.createdOn).toLocaleString()}</em></p>
 
       {!preview && (userData.isAdmin || userData.handle === post.author) && (
-        <button className='post-delete-button' onClick={handleDeletePost}>Delete Post</button>
+        <div className="post-actions">
+          <button className='post-delete-button' onClick={handleDeletePost}>Delete Post</button>
+          {onEditClick && (
+            <button className='post-edit-button' onClick={onEditClick}>Edit Post</button>
+          )}
+        </div>
+      )}
+
+      {!preview && post.editedBy && (
+        <p><em>Edited by: {post.editedBy}{userData.isAdmin && post.editedBy === userData.handle ? ' (admin)' : ''}</em></p>
       )}
 
     </div>

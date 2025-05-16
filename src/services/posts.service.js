@@ -162,3 +162,19 @@ export const deletePost = async (postId, author) => {
         throw error;
     }
 };
+
+export const editPost = async (postId, newTitle, newContent, newTags, editor) => {
+    try {
+        const updates = {
+            [`posts/${postId}/title`]: newTitle,
+            [`posts/${postId}/content`]: newContent,
+            [`posts/${postId}/tags`]: newTags,
+            [`posts/${postId}/editedBy`]: editor,
+        };
+
+        await update(ref(db), updates);
+    } catch (error) {
+        console.error('Failed to edit post:', error);
+        throw error;
+    }
+};
