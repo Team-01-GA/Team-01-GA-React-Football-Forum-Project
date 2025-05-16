@@ -14,6 +14,7 @@ import {
     uploadBytes,
     getDownloadURL,
 } from 'firebase/storage';
+import { getAllPosts } from './posts.service.js';
 
 export const getUserByEmail = async (email) => {
     const usersRef = ref(db, 'users');
@@ -89,3 +90,23 @@ export const getProfileImageUrl = async (handle) => {
         return null;
     }
 };
+
+export const getUserComments = async (handle) => {
+
+    const result = await getAllPosts();
+    
+    const userComments = result.flatMap(post => {
+        if (!post.comments) return [];
+
+        return Object.entries(post.comments)
+            .filter(([commentId, comment]) => comment.author === handle)
+            .map(([commentId, comment]) => ({
+                ...comment,
+                commentId,
+                postId: post.id,
+                postTitle: post.title,
+            }));
+    });
+
+    return userComments.length ? userComments : [];
+}

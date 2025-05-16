@@ -6,6 +6,7 @@ import PostRow from '../../components/PostRow/PostRow';
 import {
     getProfileImageUrl,
     getUserByHandle,
+    getUserComments,
     getUserData,
     toggleUserBlock,
     updateUserEmail,
@@ -17,17 +18,17 @@ import AccountPicture from '../../components/AccountPicture/AccountPicture';
 function AccountPage() {
     const user = useContext(AppContext);
     const { setContext } = useContext(AppContext);
-    const [posts, setPosts] = useState([]);
+    const [contentSwitcher, setContentSwitcher] = useState(1);
+    const [content, setContent] = useState(null);
     const [message, setMessage] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [emailValue, setEmailValue] = useState('');
     const [userToView, setUserToView] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [isUserBlocked, setUserBlocked] = useState(false);
     const [stopButton, setStopButton] = useState(false);
     const [loadingAnim, setLoadingAnim] = useState({
         accButton: false,
-        posts: false,
+        content: false,
     });
     const [accImgPicker, setAccImgPicker] = useState(false);
     const [accPic, setAccPic] = useState(null);
@@ -86,6 +87,9 @@ function AccountPage() {
                 try {
                     const url = await getProfileImageUrl(userToView.handle);
                     setAccPic(url);
+                    if (userToView.isBlocked) {
+                        setUserBlocked(true);
+                    }
                 } catch (e) {
                     console.error(e.message);
                 }
@@ -197,32 +201,49 @@ function AccountPage() {
     };
 
     useEffect(() => {
-        setLoading(true);
         setMessage(false);
 
         if (userToView) {
-            const loadPosts = async () => {
+            const loadContent = async () => {
+                setLoadingAnim((prev) => ({ ...prev, content: true }));
+
                 try {
-                    if (userToView.isBlocked) {
-                        setUserBlocked(true);
-                    }
                     const result = await getAllPosts();
-                    const filtered = result.filter(
-                        (post) => post.author === userToView.handle
-                    );
-                    setPosts(filtered);
-                } catch (err) {
-                    console.error('Error loading posts:', err);
-                    setMessage('Failed to load posts.');
+                    let filtered = null;
+
+                    switch (contentSwitcher) {
+                        case 1:
+                            filtered = result.filter(
+                                (post) => post.author === userToView.handle
+                            );
+                            break;
+
+                        case 2:
+                            filtered = await getUserComments(userToView.handle);
+                            break;
+
+                        case 3:
+                            filtered = result.filter((post) =>
+                                post.likedBy.includes(
+                                    userToView.handle
+                                )
+                            );
+                            break;
+                    }
+
+                    setContent(filtered);
+                    setLoadingAnim((prev) => ({ ...prev, content: false }));
+                } catch (e) {
+                    console.error('Error loading content:', e);
+                    setMessage('Failed to load content.');
                 }
-                setLoading(false);
             };
 
-            loadPosts();
+            loadContent();
         }
-    }, [userToView, currentUserId]);
+    }, [contentSwitcher, userToView, currentUserId]);
 
-    if (loading || !userToView || !user || !posts) return <Loader />;
+    if (!content || !user || !userToView) return <Loader />;
 
     return (
         <div id="acc-wrapper">
@@ -258,9 +279,8 @@ function AccountPage() {
                         {!editMode ? (
                             <button
                                 className={
-                                    loadingAnim.accButton
-                                        ? 'rotating-border-loading'
-                                        : ''
+                                    loadingAnim.accButton &&
+                                    'rotating-border-loading'
                                 }
                                 onClick={() => setEditMode(true)}
                                 disabled={stopButton}
@@ -293,9 +313,8 @@ function AccountPage() {
                             <button
                                 id="block-btn"
                                 className={
-                                    loadingAnim.accButton
-                                        ? 'rotating-border-loading'
-                                        : ''
+                                    loadingAnim.accButton &&
+                                    'rotating-border-loading'
                                 }
                                 onClick={() => handleUserBlock()}
                                 disabled={stopButton}
@@ -310,23 +329,57 @@ function AccountPage() {
                     <p className="acc-detail">
                         {userToView.isAdmin ? 'Admin' : 'User'}
                     </p>
-                    <p className="acc-detail">Member since: {accDetails.createdOn}</p>
-                    <p className="acc-detail">Posts: {accDetails.numberOfPosts}</p>
-                    <p className="acc-detail">Comments: {accDetails.numberOfComments}</p>
-                    <p className="acc-detail">Likes: {accDetails.numberOfLikes}</p>
+                    <p className="acc-detail">
+                        Member since: {accDetails.createdOn}
+                    </p>
+                    <p className="acc-detail">
+                        Posts: {accDetails.numberOfPosts}
+                    </p>
+                    <p className="acc-detail">
+                        Comments: {accDetails.numberOfComments}
+                    </p>
+                    <p className="acc-detail">
+                        Likes: {accDetails.numberOfLikes}
+                    </p>
+                </div>
+            </div>
+            <div id="acc-content-switcher">
+                <div className="button-container">
+                    <button
+                        className={`button-highlight
+                            ${contentSwitcher === 1 ? 'highlight-posts' : ''}
+                            ${contentSwitcher === 2 ? 'highlight-comments' : ''}
+                            ${contentSwitcher === 3 ? 'highlight-likes' : ''}`}
+                    >
+                        {contentSwitcher === 1 && 'Posts'}
+                        {contentSwitcher === 2 && 'Comments'}
+                        {contentSwitcher === 3 && 'Likes'}
+                    </button>
+                    <button onClick={() => setContentSwitcher(1)}>Posts</button>
+                    <button onClick={() => setContentSwitcher(2)}>
+                        Comments
+                    </button>
+                    <button onClick={() => setContentSwitcher(3)}>Likes</button>
                 </div>
             </div>
             <div id="acc-content">
-                <div className="acc-content-container glassmorphic-bg">
-                    {posts.length > 0 ? (
-                        posts.map((post) => (
+                <div
+                    className={`acc-content-container glassmorphic-bg ${
+                        loadingAnim.content && 'rotating-border-loading'
+                    }`}
+                >
+                    {content.length > 0 ? (
+                        content.map((post) => (
                             <PostRow key={post.id} post={post} preview={true} />
                         ))
                     ) : (
-                        <p>No posts available.</p>
+                        <p className="no-acc-content">
+                            {contentSwitcher === 1 && 'No posts to load.'}
+                            {contentSwitcher === 2 && 'No comments to load.'}
+                            {contentSwitcher === 3 && 'No liked posts to load.'}
+                        </p>
                     )}
                 </div>
-                <div className="acc-content-container glassmorphic-bg"></div>
             </div>
         </div>
     );
