@@ -149,15 +149,15 @@
 }
 
 .highlight-posts {
-    left: 0;
+    left: 0.3%;
 }
 
 .highlight-comments {
-    left: 33%;
+    left: 33.3%;
 }
 
 .highlight-likes {
-    left: 66%;
+    left: 66.6%;
 }
 
 #acc-content {
@@ -177,4 +177,21 @@
     border: 1px solid white;
     padding: 20px;
     border-radius: 15px;
+}
+
+.acc-content-container * {
+    transition: all 0.5s ease;
+}
+
+.acc-content-container.content-loading * {
+    background-color: transparent !important;
+    color: transparent !important;
+    border-color: transparent !important;
+    height: 10%;
+}
+
+.no-acc-content {
+    text-align: center;
+    font-weight: bold;
+    font-size: 2em;
 }

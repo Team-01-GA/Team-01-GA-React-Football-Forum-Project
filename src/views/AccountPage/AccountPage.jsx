@@ -14,16 +14,20 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../../components/Loader/Loader';
 import AccountPicture from '../../components/AccountPicture/AccountPicture';
+import CommentRow from '../../components/CommentRow/CommentRow';
 
 function AccountPage() {
     const user = useContext(AppContext);
     const { setContext } = useContext(AppContext);
     const [contentSwitcher, setContentSwitcher] = useState(1);
     const [content, setContent] = useState(null);
+    const [contentDelay, toggleContentDelay] = useState(false);
+    const [contentSwitcherHighlight, setContentSwitcherHighlight] = useState(1);
     const [message, setMessage] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [emailValue, setEmailValue] = useState('');
     const [userToView, setUserToView] = useState(null);
+    const [userNotFound, setUserNotFound] = useState(false);
     const [isUserBlocked, setUserBlocked] = useState(false);
     const [stopButton, setStopButton] = useState(false);
     const [loadingAnim, setLoadingAnim] = useState({
@@ -52,7 +56,7 @@ function AccountPage() {
     }, [userId, user, navigate]);
 
     useEffect(() => {
-        setMessage(false);
+        setUserNotFound(false);
 
         const setUser = async () => {
             try {
@@ -74,7 +78,7 @@ function AccountPage() {
                 });
             } catch (e) {
                 console.error('Failed to fetch user', e);
-                setMessage('Failed to fetch user.');
+                setUserNotFound(true);
             }
         };
 
@@ -200,12 +204,19 @@ function AccountPage() {
         setLoadingAnim((prev) => ({ ...prev, accButton: false }));
     };
 
+    const handleContentSwitch = async (content) => {
+        setContentSwitcherHighlight(content);
+        toggleContentDelay(true);
+        setLoadingAnim((prev) => ({ ...prev, content: true }));
+        await new Promise (resolve => setTimeout(resolve, 600));
+        setContentSwitcher(content);
+    }
+
     useEffect(() => {
         setMessage(false);
 
         if (userToView) {
             const loadContent = async () => {
-                setLoadingAnim((prev) => ({ ...prev, content: true }));
 
                 try {
                     const result = await getAllPosts();
@@ -232,6 +243,10 @@ function AccountPage() {
                     }
 
                     setContent(filtered);
+
+                    await new Promise (resolve => setTimeout(resolve, 300));
+                    toggleContentDelay(false);
+
                     setLoadingAnim((prev) => ({ ...prev, content: false }));
                 } catch (e) {
                     console.error('Error loading content:', e);
@@ -242,6 +257,8 @@ function AccountPage() {
             loadContent();
         }
     }, [contentSwitcher, userToView, currentUserId]);
+
+    if (userNotFound) return <h1>User not found.</h1>;
 
     if (!content || !user || !userToView) return <Loader />;
 
@@ -279,8 +296,9 @@ function AccountPage() {
                         {!editMode ? (
                             <button
                                 className={
-                                    loadingAnim.accButton &&
-                                    'rotating-border-loading'
+                                    loadingAnim.accButton
+                                    ? 'rotating-border-loading'
+                                    : ''
                                 }
                                 onClick={() => setEditMode(true)}
                                 disabled={stopButton}
@@ -313,8 +331,9 @@ function AccountPage() {
                             <button
                                 id="block-btn"
                                 className={
-                                    loadingAnim.accButton &&
-                                    'rotating-border-loading'
+                                    loadingAnim.accButton
+                                    ? 'rotating-border-loading'
+                                    : ''
                                 }
                                 onClick={() => handleUserBlock()}
                                 disabled={stopButton}
@@ -347,38 +366,41 @@ function AccountPage() {
                 <div className="button-container">
                     <button
                         className={`button-highlight
-                            ${contentSwitcher === 1 ? 'highlight-posts' : ''}
-                            ${contentSwitcher === 2 ? 'highlight-comments' : ''}
-                            ${contentSwitcher === 3 ? 'highlight-likes' : ''}`}
+                            ${contentSwitcherHighlight === 1 ? 'highlight-posts' : ''}
+                            ${contentSwitcherHighlight === 2 ? 'highlight-comments' : ''}
+                            ${contentSwitcherHighlight === 3 ? 'highlight-likes' : ''}`}
+                        disabled
                     >
                         {contentSwitcher === 1 && 'Posts'}
                         {contentSwitcher === 2 && 'Comments'}
                         {contentSwitcher === 3 && 'Likes'}
                     </button>
-                    <button onClick={() => setContentSwitcher(1)}>Posts</button>
-                    <button onClick={() => setContentSwitcher(2)}>
+                    <button onClick={() => handleContentSwitch(1)}>Posts</button>
+                    <button onClick={() => handleContentSwitch(2)}>
                         Comments
                     </button>
-                    <button onClick={() => setContentSwitcher(3)}>Likes</button>
+                    <button onClick={() => handleContentSwitch(3)}>Likes</button>
                 </div>
             </div>
             <div id="acc-content">
                 <div
-                    className={`acc-content-container glassmorphic-bg ${
-                        loadingAnim.content && 'rotating-border-loading'
-                    }`}
+                    className={`acc-content-container glassmorphic-bg 
+                        ${loadingAnim.content ? 'rotating-border-loading' : ''}
+                        ${contentDelay ? 'content-loading' : ''}
+                    `}
                 >
-                    {content.length > 0 ? (
-                        content.map((post) => (
-                            <PostRow key={post.id} post={post} preview={true} />
-                        ))
-                    ) : (
-                        <p className="no-acc-content">
-                            {contentSwitcher === 1 && 'No posts to load.'}
-                            {contentSwitcher === 2 && 'No comments to load.'}
-                            {contentSwitcher === 3 && 'No liked posts to load.'}
-                        </p>
-                    )}
+                    {content.length > 0 
+                        ? contentSwitcher === 2
+                            ? content.map((comment, index) => <CommentRow key={index*23456} comment={comment}/>)
+                            : content.map((post, index) => <PostRow key={index*1234} post={post} preview={true} />)
+                        : (
+                            <p className="no-acc-content">
+                                {contentSwitcher === 1 && 'No posts to load.'}
+                                {contentSwitcher === 2 && 'No comments to load.'}
+                                {contentSwitcher === 3 && 'No liked posts to load.'}
+                            </p>
+                        )
+                    }
                 </div>
             </div>
         </div>

@@ -1,0 +1,49 @@
+#homepage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: start;
+    width: 100%;
+    margin-top: 50px;
+}
+
+#forum-details {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.forum-detail {
+    background-color: rgb(225, 218, 218);
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
+}
+
+#forum-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.forum-content-title, .forum-content-container  {
+    width: 45%;
+    padding: 20px;
+}
+
+.forum-content-title {
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+    padding: 0 20px;
+    margin: 0 0 10px 0;
+}
+
+.forum-content-container {
+    border-radius: 15px;
+}

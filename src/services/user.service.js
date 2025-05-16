@@ -110,3 +110,14 @@ export const getUserComments = async (handle) => {
 
     return userComments.length ? userComments : [];
 }
+
+export const getAllUsers = async () => {
+
+    const snapshot = await get(ref(db, 'users'));
+
+    if (snapshot.exists()) {
+        return Object.entries(snapshot.val());
+    } else {
+        return [];
+    }
+}
