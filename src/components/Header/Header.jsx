@@ -1,19 +1,13 @@
 import { useContext, useState } from 'react';
 import './Header.css';
 import AppContext from '../../providers/AppContext';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { logoutUser } from '../../services/auth.service';
 
-function Header({ setSearchQuery }) {
+function Header() {
     const user = useContext(AppContext);
     const [input, setInput] = useState('');
     const navigate = useNavigate();
-    const location = useLocation();
-
-    const showSearch =
-        location.pathname === '/' ||
-        location.pathname === '/premier-league' ||
-        location.pathname === '/fantasy-premier-league';
 
     return (
         <div id="header">
@@ -23,16 +17,15 @@ function Header({ setSearchQuery }) {
             ) : (
                 <>
                     <input
-                        className={`search-input ${showSearch ? 'visible' : 'hidden'}`}
+                        className={`search-input`}
                         name='search'
                         type='text'
-                        placeholder='Search...'
+                        placeholder='Search everything...'
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                                setSearchQuery(input.trim().toLowerCase());
-                                setInput('');
+                                navigate(`/search/${input}`);
                             }
                         }}
                     />

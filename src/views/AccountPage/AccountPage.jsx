@@ -1,12 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
 import AppContext from '../../providers/AppContext';
 import './AccountPage.css';
-import { getAllPosts } from '../../services/posts.service';
+import { getAllComments, getAllPosts } from '../../services/posts.service';
 import PostRow from '../../components/PostRow/PostRow';
 import {
     getProfileImageUrl,
     getUserByHandle,
-    getUserComments,
     getUserData,
     toggleUserBlock,
     updateUserEmail,
@@ -20,7 +19,7 @@ function AccountPage() {
     const user = useContext(AppContext);
     const { setContext } = useContext(AppContext);
     const [contentSwitcher, setContentSwitcher] = useState(1);
-    const [content, setContent] = useState(null);
+    const [content, setContent] = useState([]);
     const [contentDelay, toggleContentDelay] = useState(false);
     const [contentSwitcherHighlight, setContentSwitcherHighlight] = useState(1);
     const [message, setMessage] = useState(null);
@@ -237,7 +236,7 @@ function AccountPage() {
                             break;
 
                         case 2:
-                            filtered = await getUserComments(userToView.handle);
+                            filtered = await getAllComments(userToView.handle);
                             break;
 
                         case 3:

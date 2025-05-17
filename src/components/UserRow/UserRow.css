@@ -1,0 +1,86 @@
+.user-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    padding: 20px;
+    outline: 3px solid transparent;
+    border-radius: 15px;
+    gap: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+
+    & p {
+        margin: 0;
+    }
+}
+
+.user-row:hover {
+    outline: 3px solid rgb(225, 218, 218);
+}
+
+.user-row * {
+    transition: all 0.3s ease;
+}
+
+.user-row:hover * {
+    opacity: 0.5;
+}
+
+.user-row:hover .user-link-tooltip {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.user-link-tooltip {
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    padding: 10px 15px;
+    background-color: rgb(225, 218, 218);
+    border-radius: 15px;
+    color: black;
+    opacity: 0;
+}
+
+.user-img,
+.user-img-placeholder {
+    height: 70px;
+    width: 70px;
+    background-color: antiquewhite;
+    border-radius: 50%;
+    align-self: center;
+    align-content: center;
+    justify-items: center;
+    background-size: cover;
+
+    & p {
+        margin: 0;
+        font-size: 1.5em;
+        color: rgb(54, 54, 54);
+    }
+}
+
+.user-handle {
+    font-weight: bold;
+    font-size: 2em;
+}
+
+.user-details {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 10px;
+    margin-left: 10px;
+}
+
+.user-detail {
+    background-color: rgb(225, 218, 218);
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
+}

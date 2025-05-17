@@ -193,3 +193,23 @@ export const editComment = async (postId, commentId, newContent, editor, isAdmin
 
     return update(ref(db), updates);
 };
+
+export const getAllComments = async (handle = null) => {
+
+    const result = await getAllPosts();
+    
+    const comments = result.flatMap(post => {
+        if (!post.comments) return [];
+
+        return Object.entries(post.comments)
+            .filter(([commentId, comment]) => handle ? comment.author === handle : true)
+            .map(([commentId, comment]) => ({
+                ...comment,
+                commentId,
+                postId: post.id,
+                postTitle: post.title,
+            }));
+    });
+
+    return comments.length ? comments : [];
+}

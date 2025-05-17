@@ -15,6 +15,7 @@ import FantasyPremierLeague from './views/FantasyPremierLeague/FantasyPremierLea
 import PostDetails from './views/PostDetails/PostDetails';
 import AccountPage from './views/AccountPage/AccountPage';
 import Loader from './components/Loader/Loader';
+import SeachResults from './views/SearchResults/SeachResults';
 
 
 function App() {
@@ -61,7 +62,7 @@ function App() {
         <>
             <AppContext.Provider value={{ ...appState, setContext: setAppState }}>
                 <BrowserRouter>
-                    <Header setSearchQuery={setSearchQuery} />
+                    <Header />
                     <Routes>
                         {!appState.user &&
                             <>
@@ -78,6 +79,7 @@ function App() {
                                 <Route path="/posts/:postId" element={<PostDetails />} />
                                 <Route path='/account' element={<AccountPage />} />
                                 <Route path='/account/:userId' element={<AccountPage />} />
+                                <Route path='/search/:query' element={<SeachResults />}/>
                                 <Route path='*' element={<HomePage />} />
                             </>
                         }

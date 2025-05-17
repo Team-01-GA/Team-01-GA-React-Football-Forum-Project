@@ -91,26 +91,6 @@ export const getProfileImageUrl = async (handle) => {
     }
 };
 
-export const getUserComments = async (handle) => {
-
-    const result = await getAllPosts();
-    
-    const userComments = result.flatMap(post => {
-        if (!post.comments) return [];
-
-        return Object.entries(post.comments)
-            .filter(([commentId, comment]) => comment.author === handle)
-            .map(([commentId, comment]) => ({
-                ...comment,
-                commentId,
-                postId: post.id,
-                postTitle: post.title,
-            }));
-    });
-
-    return userComments.length ? userComments : [];
-}
-
 export const getAllUsers = async () => {
 
     const snapshot = await get(ref(db, 'users'));

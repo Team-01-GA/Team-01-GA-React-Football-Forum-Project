@@ -10,7 +10,7 @@ function PostRow({ post, preview = false }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (post) {
+        if (post.id) {
             const getUserId = async () => {
                 try {
                     const snapshot = await getUserByHandle(post.author);

@@ -183,13 +183,6 @@
     transition: all 0.5s ease;
 }
 
-.acc-content-container.content-loading * {
-    background-color: transparent !important;
-    color: transparent !important;
-    border-color: transparent !important;
-    height: 10%;
-}
-
 .no-acc-content {
     text-align: center;
     font-weight: bold;

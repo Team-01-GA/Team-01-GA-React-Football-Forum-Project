@@ -46,6 +46,15 @@
 }
 
 .comment-row .comment-date {
-    color: rgba(255, 255, 255, 0.7);
     text-align: right;
+}
+
+.comment-row .comment-author {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.comment-row .comment-date, .comment-row .comment-author {
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.7);
 }
