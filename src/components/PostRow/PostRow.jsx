@@ -1,8 +1,34 @@
 import { useNavigate } from 'react-router-dom';
 import './PostRow.css';
+import { useEffect, useState } from 'react';
+import { getUserByHandle } from '../../services/user.service';
 
 function PostRow({ post, preview = false }) {
+
+    const [authorId, setAuthorId] = useState(null);
+
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (post) {
+            const getUserId = async () => {
+                try {
+                    const snapshot = await getUserByHandle(post.author);
+    
+                    if (!snapshot.exists()) {
+                        throw new Error(`User not found for postId ${post.id}`);
+                    }
+    
+                    setAuthorId(snapshot.val().uid);
+                }
+                catch (e) {
+                    console.error('Error getting post author link:', e);
+                }
+            }
+    
+            getUserId();
+        }
+    }, [post]);
   
     return (
       <div
@@ -13,7 +39,7 @@ function PostRow({ post, preview = false }) {
         <h3>{post.title}</h3>
   
         {!preview && (
-          <p><strong>By:</strong> {post.author}</p>
+          <p onClick={() => navigate(`/account/${authorId}`)}><strong>By:</strong> {post.author}</p>
         )}
   
         <p style={{ whiteSpace: 'pre-wrap' }}>

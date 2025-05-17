@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { deleteComment, getPostById } from '../../services/posts.service';
 import PostCard from '../../components/PostCard/PostCard';
 import { useContext } from 'react';
 import AppContext from '../../providers/AppContext';
 import { addComment } from '../../services/posts.service';
 import './PostDetails.css';
-import Loader from '../../components/Loader/Loader'
+import Loader from '../../components/Loader/Loader';
 import { editPost, editComment } from '../../services/posts.service';
+import { getUserByHandle } from '../../services/user.service';
 
 export default function PostDetails() {
     const { postId } = useParams();
@@ -24,8 +25,11 @@ export default function PostDetails() {
     });
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editCommentText, setEditCommentText] = useState('');
+    const [authorId, setAuthorId] = useState(null);
 
     const { userData } = useContext(AppContext);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = `${
@@ -33,6 +37,26 @@ export default function PostDetails() {
                 ? `${post.title} - React Fantasy Football Forum`
                 : 'Post not found - React Fantasy Football Forum'
         }`;
+    }, [post]);
+
+    useEffect(() => {
+        if (post) {
+            const getUserId = async () => {
+                try {
+                    const snapshot = await getUserByHandle(post.author);
+
+                    if (!snapshot.exists()) {
+                        throw new Error(`User not found for postId ${post.id}`);
+                    }
+
+                    setAuthorId(snapshot.val().uid);
+                } catch (e) {
+                    console.error('Error getting post author link:', e);
+                }
+            };
+
+            getUserId();
+        }
     }, [post]);
 
     useEffect(() => {
@@ -122,7 +146,14 @@ export default function PostDetails() {
         }
 
         try {
-            await editPost(postId, editFields.title, editFields.content, tagsArray, userData.handle, userData.isAdmin);
+            await editPost(
+                postId,
+                editFields.title,
+                editFields.content,
+                tagsArray,
+                userData.handle,
+                userData.isAdmin
+            );
             alert('Post updated successfully!');
 
             const updated = await getPostById(postId);
@@ -136,7 +167,13 @@ export default function PostDetails() {
 
     const handleSaveCommentEdit = async (commentId) => {
         try {
-            await editComment(postId, commentId, editCommentText, userData.handle, userData.isAdmin);
+            await editComment(
+                postId,
+                commentId,
+                editCommentText,
+                userData.handle,
+                userData.isAdmin
+            );
             const updated = await getPostById(postId);
             setPost(updated);
             setEditingCommentId(null);
@@ -243,38 +280,81 @@ export default function PostDetails() {
                         .map(([commentId, comment]) => (
                             <div key={commentId} className="comment">
                                 <p>
-                                    <strong>{comment.author}</strong> — {new Date(comment.createdOn).toLocaleString()}
+                                    <strong onClick={() => navigate(`/account/${authorId}`)}>
+                                        {comment.author}
+                                    </strong>{' '}
+                                    —{' '}
+                                    {new Date(
+                                        comment.createdOn
+                                    ).toLocaleString()}
                                 </p>
 
                                 {editingCommentId === commentId ? (
-                                    <div className='comment-edit-form'>
+                                    <div className="comment-edit-form">
                                         <textarea
                                             rows="4"
                                             value={editCommentText}
-                                            onChange={(e) => setEditCommentText(e.target.value)}
+                                            onChange={(e) =>
+                                                setEditCommentText(
+                                                    e.target.value
+                                                )
+                                            }
                                         />
                                         <div className="comment-edit-save-cancel-buttons">
-                                            <button onClick={() => handleSaveCommentEdit(commentId)}>Save</button>
-                                            <button onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                            <button
+                                                onClick={() =>
+                                                    handleSaveCommentEdit(
+                                                        commentId
+                                                    )
+                                                }
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    setEditingCommentId(null)
+                                                }
+                                            >
+                                                Cancel
+                                            </button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className='comment-content'>{comment.content}</p>
+                                    <p className="comment-content">
+                                        {comment.content}
+                                    </p>
                                 )}
 
                                 <hr />
 
                                 {comment.editedBy && (
-                                    <p><em>Edited by: {comment.editedBy.handle}{comment.editedBy.isAdmin ? ' (admin)' : ''}</em></p>
+                                    <p>
+                                        <em>
+                                            Edited by: {comment.editedBy.handle}
+                                            {comment.editedBy.isAdmin
+                                                ? ' (admin)'
+                                                : ''}
+                                        </em>
+                                    </p>
                                 )}
 
-                                {(userData.handle === comment.author || userData.isAdmin) && (
+                                {(userData.handle === comment.author ||
+                                    userData.isAdmin) && (
                                     <div className="comment-edit-save-cancel-buttons">
-                                        <button style={{backgroundColor: 'red'}} onClick={() => handleDeleteComment(commentId)}>Delete</button>
+                                        <button
+                                            style={{ backgroundColor: 'red' }}
+                                            onClick={() =>
+                                                handleDeleteComment(commentId)
+                                            }
+                                        >
+                                            Delete
+                                        </button>
                                         <button
                                             onClick={() => {
                                                 setEditingCommentId(commentId);
-                                                setEditCommentText(comment.content);
+                                                setEditCommentText(
+                                                    comment.content
+                                                );
                                             }}
                                         >
                                             Edit
