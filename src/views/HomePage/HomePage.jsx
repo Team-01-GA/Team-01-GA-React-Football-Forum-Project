@@ -11,6 +11,10 @@ function HomePage() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        document.title = 'React Fantasy Football Forum';
+    }, []);
+
+    useEffect(() => {
         setLoading(true);
         const loadForumData = async () => {
             try {

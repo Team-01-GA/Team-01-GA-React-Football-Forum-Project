@@ -28,6 +28,10 @@ export default function AllPosts({ category = null, searchQuery = '', setSearchQ
         loadPosts();
     }, [category]);
 
+    useEffect(() => {
+        document.title = 'All Posts - React Fantasy Football Forum';
+    }, []);
+
     const location = useLocation();
     useEffect(() => {
         setSearchQuery('');

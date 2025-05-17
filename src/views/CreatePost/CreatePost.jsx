@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AppContext from '../../providers/AppContext';
 import { addPost } from '../../services/posts.service';
 
@@ -13,6 +13,10 @@ export default function CreatePost() {
     });
 
     const { userData } = useContext(AppContext)
+
+    useEffect(() => {
+        document.title = 'Create Post - React Fantasy Football Forum';
+    }, []);
 
     const handleUpdateValue = (key, value) => {
         setFields({

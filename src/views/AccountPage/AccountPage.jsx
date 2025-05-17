@@ -50,6 +50,14 @@ function AccountPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        document.title = `${
+            userToView
+                ? `${userToView.handle} - Accounts - React Fantasy Football Forum`
+                : 'Account not found - React Fantasy Footbal Forum'
+        }`;
+    }, [userToView]);
+
+    useEffect(() => {
         if (!userId) {
             navigate(`/account/${user.user.uid}`, { replace: true });
         }
@@ -208,16 +216,15 @@ function AccountPage() {
         setContentSwitcherHighlight(content);
         toggleContentDelay(true);
         setLoadingAnim((prev) => ({ ...prev, content: true }));
-        await new Promise (resolve => setTimeout(resolve, 600));
+        await new Promise((resolve) => setTimeout(resolve, 600));
         setContentSwitcher(content);
-    }
+    };
 
     useEffect(() => {
         setMessage(false);
 
         if (userToView) {
             const loadContent = async () => {
-
                 try {
                     const result = await getAllPosts();
                     let filtered = null;
@@ -235,16 +242,14 @@ function AccountPage() {
 
                         case 3:
                             filtered = result.filter((post) =>
-                                post.likedBy.includes(
-                                    userToView.handle
-                                )
+                                post.likedBy.includes(userToView.handle)
                             );
                             break;
                     }
 
                     setContent(filtered);
 
-                    await new Promise (resolve => setTimeout(resolve, 300));
+                    await new Promise((resolve) => setTimeout(resolve, 300));
                     toggleContentDelay(false);
 
                     setLoadingAnim((prev) => ({ ...prev, content: false }));
@@ -297,8 +302,8 @@ function AccountPage() {
                             <button
                                 className={
                                     loadingAnim.accButton
-                                    ? 'rotating-border-loading'
-                                    : ''
+                                        ? 'rotating-border-loading'
+                                        : ''
                                 }
                                 onClick={() => setEditMode(true)}
                                 disabled={stopButton}
@@ -332,8 +337,8 @@ function AccountPage() {
                                 id="block-btn"
                                 className={
                                     loadingAnim.accButton
-                                    ? 'rotating-border-loading'
-                                    : ''
+                                        ? 'rotating-border-loading'
+                                        : ''
                                 }
                                 onClick={() => handleUserBlock()}
                                 disabled={stopButton}
@@ -366,20 +371,36 @@ function AccountPage() {
                 <div className="button-container">
                     <button
                         className={`button-highlight
-                            ${contentSwitcherHighlight === 1 ? 'highlight-posts' : ''}
-                            ${contentSwitcherHighlight === 2 ? 'highlight-comments' : ''}
-                            ${contentSwitcherHighlight === 3 ? 'highlight-likes' : ''}`}
+                            ${
+                                contentSwitcherHighlight === 1
+                                    ? 'highlight-posts'
+                                    : ''
+                            }
+                            ${
+                                contentSwitcherHighlight === 2
+                                    ? 'highlight-comments'
+                                    : ''
+                            }
+                            ${
+                                contentSwitcherHighlight === 3
+                                    ? 'highlight-likes'
+                                    : ''
+                            }`}
                         disabled
                     >
                         {contentSwitcher === 1 && 'Posts'}
                         {contentSwitcher === 2 && 'Comments'}
                         {contentSwitcher === 3 && 'Likes'}
                     </button>
-                    <button onClick={() => handleContentSwitch(1)}>Posts</button>
+                    <button onClick={() => handleContentSwitch(1)}>
+                        Posts
+                    </button>
                     <button onClick={() => handleContentSwitch(2)}>
                         Comments
                     </button>
-                    <button onClick={() => handleContentSwitch(3)}>Likes</button>
+                    <button onClick={() => handleContentSwitch(3)}>
+                        Likes
+                    </button>
                 </div>
             </div>
             <div id="acc-content">
@@ -389,18 +410,30 @@ function AccountPage() {
                         ${contentDelay ? 'content-loading' : ''}
                     `}
                 >
-                    {content.length > 0 
-                        ? contentSwitcher === 2
-                            ? content.map((comment, index) => <CommentRow key={index*23456} comment={comment}/>)
-                            : content.map((post, index) => <PostRow key={index*1234} post={post} preview={true} />)
-                        : (
-                            <p className="no-acc-content">
-                                {contentSwitcher === 1 && 'No posts to load.'}
-                                {contentSwitcher === 2 && 'No comments to load.'}
-                                {contentSwitcher === 3 && 'No liked posts to load.'}
-                            </p>
+                    {content.length > 0 ? (
+                        contentSwitcher === 2 ? (
+                            content.map((comment, index) => (
+                                <CommentRow
+                                    key={index * 23456}
+                                    comment={comment}
+                                />
+                            ))
+                        ) : (
+                            content.map((post, index) => (
+                                <PostRow
+                                    key={index * 1234}
+                                    post={post}
+                                    preview={true}
+                                />
+                            ))
                         )
-                    }
+                    ) : (
+                        <p className="no-acc-content">
+                            {contentSwitcher === 1 && 'No posts to load.'}
+                            {contentSwitcher === 2 && 'No comments to load.'}
+                            {contentSwitcher === 3 && 'No liked posts to load.'}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>

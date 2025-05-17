@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './AuthGate.css';
 import Login from '../../components/Login/Login';
 import Register from '../../components/Register/Register';
@@ -10,6 +10,10 @@ function AuthGate() {
     const [isNew, setIsNew] = useState(true);
 
     const [authError, setAuthError] = useState(null);
+
+    useEffect(() => {
+            document.title = 'Authentication - React Fantasy Football Forum';
+    }, []);
 
     return (
         <>

@@ -28,6 +28,14 @@ export default function PostDetails() {
     const { userData } = useContext(AppContext);
 
     useEffect(() => {
+        document.title = `${
+            post
+                ? `${post.title} - React Fantasy Football Forum`
+                : 'Post not found - React Fantasy Football Forum'
+        }`;
+    }, [post]);
+
+    useEffect(() => {
         const fetchPost = async () => {
             try {
                 const data = await getPostById(postId);
@@ -49,7 +57,7 @@ export default function PostDetails() {
     }, [postId]);
 
     // if (loading) return <p>Loading...</p>;
-    if (loading) return <Loader />
+    if (loading) return <Loader />;
 
     // if (!post) {
     //     return <Navigate to="/" replace />;
@@ -81,7 +89,9 @@ export default function PostDetails() {
     };
 
     const handleDeleteComment = async (commentId) => {
-        const confirm = window.confirm('Are you sure you want to delete this comment?')
+        const confirm = window.confirm(
+            'Are you sure you want to delete this comment?'
+        );
         if (!confirm) {
             return;
         }
@@ -92,21 +102,23 @@ export default function PostDetails() {
             //refresh on delete
             const updated = await getPostById(postId);
             setPost(updated);
-            alert('Comment was deleted successfully!')
+            alert('Comment was deleted successfully!');
         } catch (error) {
             console.error('Failed to delete comment:', error);
             alert('Could not delete comment.');
         }
-    }
+    };
 
     const handleEditPost = async () => {
         const tagsArray = editFields.tags
             .split(', ')
-            .map(tag => tag.trim().toLowerCase())
-            .filter(tag => tag.length > 0 && tag.length <= 32);
+            .map((tag) => tag.trim().toLowerCase())
+            .filter((tag) => tag.length > 0 && tag.length <= 32);
 
         if (tagsArray.length < 3) {
-            return alert('Please provide at least three tags, each up to 32 characters.');
+            return alert(
+                'Please provide at least three tags, each up to 32 characters.'
+            );
         }
 
         try {
@@ -137,7 +149,6 @@ export default function PostDetails() {
 
     return (
         <div className="post-details">
-
             {!isEditing && (
                 <PostCard
                     post={post}
@@ -154,27 +165,41 @@ export default function PostDetails() {
                     <label>Title:</label>
                     <input
                         value={editFields.title}
-                        onChange={(e) => setEditFields(prev => ({ ...prev, title: e.target.value }))}
+                        onChange={(e) =>
+                            setEditFields((prev) => ({
+                                ...prev,
+                                title: e.target.value,
+                            }))
+                        }
                     />
 
                     <label>Content:</label>
                     <textarea
                         rows="6"
                         value={editFields.content}
-                        onChange={(e) => setEditFields(prev => ({ ...prev, content: e.target.value }))}
+                        onChange={(e) =>
+                            setEditFields((prev) => ({
+                                ...prev,
+                                content: e.target.value,
+                            }))
+                        }
                     />
 
                     <label>Tags (comma and space separated):</label>
                     <input
                         value={editFields.tags}
-                        onChange={(e) => setEditFields(prev => ({ ...prev, tags: e.target.value }))}
+                        onChange={(e) =>
+                            setEditFields((prev) => ({
+                                ...prev,
+                                tags: e.target.value,
+                            }))
+                        }
                     />
 
                     <button onClick={handleEditPost}>Save</button>
                     <button onClick={() => setIsEditing(false)}>Cancel</button>
                 </div>
             )}
-
 
             {!userData.isBlocked ? (
                 <>
