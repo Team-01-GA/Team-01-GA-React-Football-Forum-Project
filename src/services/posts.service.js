@@ -163,13 +163,16 @@ export const deletePost = async (postId, author) => {
     }
 };
 
-export const editPost = async (postId, newTitle, newContent, newTags, editor) => {
+export const editPost = async (postId, newTitle, newContent, newTags, editor, isAdmin) => {
     try {
         const updates = {
             [`posts/${postId}/title`]: newTitle,
             [`posts/${postId}/content`]: newContent,
             [`posts/${postId}/tags`]: newTags,
-            [`posts/${postId}/editedBy`]: editor,
+            [`posts/${postId}/editedBy`]: {
+                handle: editor,
+                isAdmin: isAdmin,
+            },
         };
 
         await update(ref(db), updates);
@@ -177,4 +180,16 @@ export const editPost = async (postId, newTitle, newContent, newTags, editor) =>
         console.error('Failed to edit post:', error);
         throw error;
     }
+};
+
+export const editComment = async (postId, commentId, newContent, editor, isAdmin) => {
+    const updates = {
+        [`posts/${postId}/comments/${commentId}/content`]: newContent,
+        [`posts/${postId}/comments/${commentId}/editedBy`]: {
+            handle: editor,
+            isAdmin: isAdmin,
+        },
+    };
+
+    return update(ref(db), updates);
 };

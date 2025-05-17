@@ -98,3 +98,50 @@
   padding: 8px 12px;
   margin-top: 8px;
 }
+
+.comment p {
+  margin: 4px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+
+.comment-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.comment-edit-form textarea {
+  font-size: 16px;
+  padding: 8px;
+  resize: vertical;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  min-height: 80px;
+}
+
+.comment-edit-save-cancel-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-edit-save-cancel-buttons button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+}
+
+.comment-edit-save-cancel-buttons button:last-child {
+  background-color: #6c757d;
+}
+
+.comment-content{
+  font-weight: bold;
+}

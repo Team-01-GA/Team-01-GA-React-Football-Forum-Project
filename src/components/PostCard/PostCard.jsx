@@ -109,7 +109,7 @@ export default function PostCard({ post, preview = false, onEditClick = null }) 
       )}
 
       {!preview && post.editedBy && (
-        <p><em>Edited by: {post.editedBy}{userData.isAdmin && post.editedBy === userData.handle ? ' (admin)' : ''}</em></p>
+        <p><em>Edited by: {post.editedBy.handle}{post.editedBy.isAdmin ? ' (admin)' : ''}</em></p>
       )}
 
     </div>

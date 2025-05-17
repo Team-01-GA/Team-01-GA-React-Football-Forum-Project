@@ -6,6 +6,10 @@
   margin: 8px;
   border-radius: 8px;
   transition: opacity 0.2s ease-in-out;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .post-card.clickable:hover {
