@@ -1,6 +1,20 @@
-import { ref, push, get, set, update, query, equalTo, orderByChild, orderByKey } from 'firebase/database';
-import { db } from '../config/firebase-config.js';
-
+import {
+    ref,
+    push,
+    get,
+    set,
+    update,
+    query,
+    equalTo,
+    orderByChild,
+    orderByKey,
+} from 'firebase/database';
+import { db, storage } from '../config/firebase-config.js';
+import {
+    ref as storageRef,
+    uploadBytes,
+    getDownloadURL,
+} from 'firebase/storage';
 
 export const getAllPosts = async (search = '') => {
     const snapshot = await get(ref(db, 'posts'));
@@ -19,25 +33,37 @@ export const getAllPosts = async (search = '') => {
     }));
 
     if (search) {
-        return posts.filter(post => post.title.toLowerCase().includes(search.toLowerCase()));
+        return posts.filter((post) =>
+            post.title.toLowerCase().includes(search.toLowerCase())
+        );
     }
 
     return posts;
-}
+};
 
 export const addPost = async (author, title, content, category, tags) => {
+    const post = {
+        author,
+        title,
+        content,
+        category,
+        tags,
+        createdOn: new Date().toString(),
+        likes: 0,
+        comments: {},
+    };
 
-    const post = { author, title, content, category, tags, createdOn: new Date().toString(), likes: 0, comments: {} };
-
-    const result = await push(ref(db, 'posts'), post)
-    const id = result.key
+    const result = await push(ref(db, 'posts'), post);
+    const id = result.key;
 
     // await update(ref(db, `posts/${id}`), { id })
     await update(ref(db), {
         [`posts/${id}/id`]: id,
         [`users/${author}/posts/${id}`]: true,
     });
-}
+
+    return id;
+};
 
 export const likePost = async (handle, postId) => {
     try {
@@ -48,14 +74,14 @@ export const likePost = async (handle, postId) => {
             [`posts/${postId}/likedBy/${handle}`]: true,
             [`users/${handle}/likedPosts/${postId}`]: true,
             [`posts/${postId}/likes`]: currentLikes + 1,
-        }
+        };
 
         await update(ref(db), updatedPost);
     } catch (error) {
         console.error('Failed to like post:', error);
         throw error;
     }
-}
+};
 
 export const unlikePost = async (handle, postId) => {
     try {
@@ -67,14 +93,14 @@ export const unlikePost = async (handle, postId) => {
             [`posts/${postId}/likedBy/${handle}`]: null,
             [`users/${handle}/likedPosts/${postId}`]: null,
             [`posts/${postId}/likes`]: safeLikes,
-        }
+        };
 
         return update(ref(db), updatedPost);
     } catch (error) {
         console.error('Failed to unlike post:', error);
         throw error;
     }
-}
+};
 
 export const getPostById = async (id) => {
     const snapshot = await get(ref(db, `posts/${id}`));
@@ -86,8 +112,8 @@ export const getPostById = async (id) => {
     return {
         ...snapshot.val(),
         likedBy: Object.keys(snapshot.val().likedBy || {}),
-    }
-}
+    };
+};
 
 export const addComment = async (postId, author, content) => {
     try {
@@ -100,7 +126,10 @@ export const addComment = async (postId, author, content) => {
         const postSnapshot = await get(ref(db, `posts/${postId}`));
         const currentCount = postSnapshot.val().commentCount || 0;
 
-        const commentRef = await push(ref(db, `posts/${postId}/comments`), comment);
+        const commentRef = await push(
+            ref(db, `posts/${postId}/comments`),
+            comment
+        );
         const commentId = commentRef.key;
 
         await update(ref(db), {
@@ -129,8 +158,7 @@ export const deleteComment = async (postId, author, commentId) => {
         console.log('Failed to delete comment:', error);
         throw error;
     }
-}
-
+};
 
 export const deletePost = async (postId, author) => {
     try {
@@ -163,7 +191,15 @@ export const deletePost = async (postId, author) => {
     }
 };
 
-export const editPost = async (postId, newTitle, newContent, newTags, editor, isAdmin) => {
+export const editPost = async (
+    postId,
+    newTitle,
+    newContent,
+    hasImg,
+    newTags,
+    editor,
+    isAdmin
+) => {
     try {
         const updates = {
             [`posts/${postId}/title`]: newTitle,
@@ -175,6 +211,10 @@ export const editPost = async (postId, newTitle, newContent, newTags, editor, is
             },
         };
 
+        if (!hasImg) {
+            updates[`posts/${postId}/postImg`] = null
+        }
+
         await update(ref(db), updates);
     } catch (error) {
         console.error('Failed to edit post:', error);
@@ -182,7 +222,13 @@ export const editPost = async (postId, newTitle, newContent, newTags, editor, is
     }
 };
 
-export const editComment = async (postId, commentId, newContent, editor, isAdmin) => {
+export const editComment = async (
+    postId,
+    commentId,
+    newContent,
+    editor,
+    isAdmin
+) => {
     const updates = {
         [`posts/${postId}/comments/${commentId}/content`]: newContent,
         [`posts/${postId}/comments/${commentId}/editedBy`]: {
@@ -195,14 +241,15 @@ export const editComment = async (postId, commentId, newContent, editor, isAdmin
 };
 
 export const getAllComments = async (handle = null) => {
-
     const result = await getAllPosts();
 
-    const comments = result.flatMap(post => {
+    const comments = result.flatMap((post) => {
         if (!post.comments) return [];
 
         return Object.entries(post.comments)
-            .filter(([commentId, comment]) => handle ? comment.author === handle : true)
+            .filter(([commentId, comment]) =>
+                handle ? comment.author === handle : true
+            )
             .map(([commentId, comment]) => ({
                 ...comment,
                 commentId,
@@ -233,4 +280,26 @@ export const unlikeComment = async (postId, commentId) => {
     await update(ref(db), {
         [`posts/${postId}/comments/${commentId}/likes`]: safeLikes,
     });
+};
+
+export const uploadPostImage = async (postId, file) => {
+
+    const imgLocRef = storageRef(storage, `posts/${postId}/post.jpg`);
+    await uploadBytes(imgLocRef, file);
+
+    const url = await getDownloadURL(imgLocRef);
+
+    await set(ref(db, `posts/${postId}/postImg`), url);
+
+    return url;
+};
+
+export const getPostImageUrl = async (postId) => {
+
+    const snapshot = await get(ref(db, `posts/${postId}/postImg`));
+    if (snapshot.exists()) {
+        return snapshot.val();
+    } else {
+        return null;
+    }
 };

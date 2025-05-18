@@ -14,7 +14,6 @@ import {
     uploadBytes,
     getDownloadURL,
 } from 'firebase/storage';
-import { getAllPosts } from './posts.service.js';
 
 export const getUserByEmail = async (email) => {
     const usersRef = ref(db, 'users');

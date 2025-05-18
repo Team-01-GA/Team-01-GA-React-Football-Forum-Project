@@ -100,6 +100,7 @@ export default function PostCard({
                         <strong>Category:</strong>{' '}
                         {post.category.replaceAll('-', ' ')}
                     </p>
+                    {post?.postImg && <img src={post.postImg} style={{ width: '100%' }} />}
 
                     {post.tags && (
                         <p>

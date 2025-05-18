@@ -22,6 +22,7 @@ export default function PostDetails() {
     const [editFields, setEditFields] = useState({
         title: '',
         content: '',
+        hasImg: false,
         tags: '',
     });
     const [editingCommentId, setEditingCommentId] = useState(null);
@@ -69,6 +70,7 @@ export default function PostDetails() {
                 setEditFields({
                     title: data.title || '',
                     content: data.content || '',
+                    hasImg: !!data?.postImg,
                     tags: Object.values(data.tags || {}).join(', '),
                 });
             } catch (err) {
@@ -151,6 +153,7 @@ export default function PostDetails() {
                 postId,
                 editFields.title,
                 editFields.content,
+                editFields.hasImg,
                 tagsArray,
                 userData.handle,
                 userData.isAdmin
@@ -245,6 +248,13 @@ export default function PostDetails() {
                             }))
                         }
                     />
+                    {editFields.hasImg && 
+                        <>
+                            <p>Image:</p>
+                            <img src={post?.postImg} style={{ width: '100%' }}/>
+                            <button onClick={() => setEditFields((prev) => ({...prev, hasImg: false}))}>Remove image</button>
+                        </>
+                    }
 
                     <label>Tags (comma and space separated):</label>
                     <input
