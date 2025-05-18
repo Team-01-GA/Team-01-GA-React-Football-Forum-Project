@@ -17,7 +17,7 @@ export default function PostDetails() {
     const [loading, setLoading] = useState(true);
     const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const [sortNewestFirst, setSortNewestFirst] = useState(true);
+    const [sortCommentType, setSortCommentType] = useState('newest');
     const [isEditing, setIsEditing] = useState(false);
     const [editFields, setEditFields] = useState({
         title: '',
@@ -288,18 +288,34 @@ export default function PostDetails() {
 
             <div className="comments-header">
                 <h3>Comments</h3>
-                <button onClick={() => setSortNewestFirst((prev) => !prev)}>
-                    Sort to: {sortNewestFirst ? 'Newest First' : 'Oldest First'}
-                </button>
+                <select
+                    className="comment-sort-select"
+                    value={sortCommentType}
+                    onChange={(e) => setSortCommentType(e.target.value)}
+                >
+                    <option value="newest">Sort by Newest</option>
+                    <option value="oldest">Sort by Oldest</option>
+                    <option value="mostLiked">Sort by Most Likes</option>
+                    <option value="leastLiked">Sort by Least Likes</option>
+                </select>
             </div>
 
             <div className="comments-section">
                 {post.comments ? (
                     Object.entries(post.comments)
                         .sort(([, a], [, b]) => {
-                            return sortNewestFirst
-                                ? new Date(b.createdOn) - new Date(a.createdOn)
-                                : new Date(a.createdOn) - new Date(b.createdOn);
+                            switch (sortCommentType) {
+                                case 'newest':
+                                    return new Date(b.createdOn) - new Date(a.createdOn);
+                                case 'oldest':
+                                    return new Date(a.createdOn) - new Date(b.createdOn);
+                                case 'mostLiked':
+                                    return (b.likes || 0) - (a.likes || 0);
+                                case 'leastLiked':
+                                    return (a.likes || 0) - (b.likes || 0);
+                                default:
+                                    return 0;
+                            }
                         })
                         .map(([commentId, comment]) => (
                             <div key={commentId} className="comment">
