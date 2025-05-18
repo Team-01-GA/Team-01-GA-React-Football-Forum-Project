@@ -197,7 +197,7 @@ export const editComment = async (postId, commentId, newContent, editor, isAdmin
 export const getAllComments = async (handle = null) => {
 
     const result = await getAllPosts();
-    
+
     const comments = result.flatMap(post => {
         if (!post.comments) return [];
 
@@ -213,3 +213,24 @@ export const getAllComments = async (handle = null) => {
 
     return comments.length ? comments : [];
 }
+
+export const likeComment = async (postId, commentId) => {
+    const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
+    const snapshot = await get(commentRef);
+    const currentLikes = snapshot.val().likes || 0;
+
+    await update(ref(db), {
+        [`posts/${postId}/comments/${commentId}/likes`]: currentLikes + 1,
+    });
+};
+
+export const unlikeComment = async (postId, commentId) => {
+    const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
+    const snapshot = await get(commentRef);
+    const currentLikes = snapshot.val().likes || 1;
+    const safeLikes = Math.max(currentLikes - 1, 0);
+
+    await update(ref(db), {
+        [`posts/${postId}/comments/${commentId}/likes`]: safeLikes,
+    });
+};

@@ -9,6 +9,7 @@ import './PostDetails.css';
 import Loader from '../../components/Loader/Loader';
 import { editPost, editComment } from '../../services/posts.service';
 import { getUserByHandle } from '../../services/user.service';
+import { likeComment, unlikeComment } from '../../services/posts.service';
 
 export default function PostDetails() {
     const { postId } = useParams();
@@ -26,17 +27,17 @@ export default function PostDetails() {
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editCommentText, setEditCommentText] = useState('');
     const [authorId, setAuthorId] = useState(null);
+    const [likedComments, setLikedComments] = useState({});
 
     const { userData } = useContext(AppContext);
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        document.title = `${
-            post
-                ? `${post.title} - React Fantasy Football Forum`
-                : 'Post not found - React Fantasy Football Forum'
-        }`;
+        document.title = `${post
+            ? `${post.title} - React Fantasy Football Forum`
+            : 'Post not found - React Fantasy Football Forum'
+            }`;
     }, [post]);
 
     useEffect(() => {
@@ -184,6 +185,29 @@ export default function PostDetails() {
         }
     };
 
+    const handleToggleCommentLike = async (commentId) => {
+        const isLiked = likedComments[commentId];
+
+        try {
+            if (isLiked) {
+                await unlikeComment(post.id, commentId);
+            } else {
+                await likeComment(post.id, commentId);
+            }
+
+            const updated = await getPostById(postId);
+            setPost(updated);
+
+            setLikedComments(prev => ({
+                ...prev,
+                [commentId]: !isLiked,
+            }));
+        } catch (err) {
+            alert('Failed to toggle like');
+            console.error(err);
+        }
+    };
+
     return (
         <div className="post-details">
             {!isEditing && (
@@ -279,15 +303,21 @@ export default function PostDetails() {
                         })
                         .map(([commentId, comment]) => (
                             <div key={commentId} className="comment">
-                                <p>
-                                    <strong onClick={() => navigate(`/account/${authorId}`)}>
-                                        {comment.author}
-                                    </strong>{' '}
-                                    —{' '}
-                                    {new Date(
-                                        comment.createdOn
-                                    ).toLocaleString()}
-                                </p>
+                                <div className="comment-header">
+                                    <p>
+                                        <strong onClick={() => navigate(`/account/${authorId}`)} style={{ cursor: 'pointer' }}>
+                                            {comment.author}
+                                        </strong>{' '}
+                                        — {new Date(comment.createdOn).toLocaleString()}
+                                    </p>
+
+                                    <button
+                                        className="comment-like-button"
+                                        onClick={() => handleToggleCommentLike(commentId)}
+                                    >
+                                        {likedComments[commentId] ? 'Unlike' : 'Like'}: {comment.likes || 0}
+                                    </button>
+                                </div>
 
                                 {editingCommentId === commentId ? (
                                     <div className="comment-edit-form">
@@ -340,27 +370,27 @@ export default function PostDetails() {
 
                                 {(userData.handle === comment.author ||
                                     userData.isAdmin) && (
-                                    <div className="comment-edit-save-cancel-buttons">
-                                        <button
-                                            style={{ backgroundColor: 'red' }}
-                                            onClick={() =>
-                                                handleDeleteComment(commentId)
-                                            }
-                                        >
-                                            Delete
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setEditingCommentId(commentId);
-                                                setEditCommentText(
-                                                    comment.content
-                                                );
-                                            }}
-                                        >
-                                            Edit
-                                        </button>
-                                    </div>
-                                )}
+                                        <div className="comment-edit-save-cancel-buttons">
+                                            <button
+                                                style={{ backgroundColor: 'red' }}
+                                                onClick={() =>
+                                                    handleDeleteComment(commentId)
+                                                }
+                                            >
+                                                Delete
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setEditingCommentId(commentId);
+                                                    setEditCommentText(
+                                                        comment.content
+                                                    );
+                                                }}
+                                            >
+                                                Edit
+                                            </button>
+                                        </div>
+                                    )}
                             </div>
                         ))
                 ) : (
