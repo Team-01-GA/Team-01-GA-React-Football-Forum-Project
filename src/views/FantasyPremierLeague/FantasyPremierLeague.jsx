@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import AllPosts from '../AllPosts/AllPosts';
 
-export default function FantasyPremierLeague({ searchQuery, setSearchQuery }) {
+export default function FantasyPremierLeague() {
 
     useEffect(() => {
         document.title = 'Fantasy League - React Fantasy Football Forum';
     }, []);
 
-    return <AllPosts category="fantasy-premier-league" searchQuery={searchQuery} setSearchQuery={setSearchQuery} />;
+    return <AllPosts category="fantasy-premier-league" />;
 }

@@ -3,9 +3,8 @@ import { getAllPosts } from "../../services/posts.service";
 import PostCard from "../../components/PostCard/PostCard";
 import './AllPosts.css';
 import PostRow from "../../components/PostRow/PostRow";
-import { useLocation } from 'react-router-dom';
 
-export default function AllPosts({ category = null, searchQuery = '', setSearchQuery }) {
+export default function AllPosts({ category = null }) {
     const [posts, setPosts] = useState([]);
     const [error, setError] = useState(null);
     const [useRowView, setUseRowView] = useState(false);
@@ -32,11 +31,6 @@ export default function AllPosts({ category = null, searchQuery = '', setSearchQ
         document.title = 'All Posts - React Fantasy Football Forum';
     }, []);
 
-    const location = useLocation();
-    useEffect(() => {
-        setSearchQuery('');
-    }, [location.key]); // clears search on any navigation
-
     if (error) return <p>{error}</p>;
 
     const sortedPosts = [...posts].sort((a, b) => {
@@ -52,22 +46,6 @@ export default function AllPosts({ category = null, searchQuery = '', setSearchQ
         return 0;
     });
 
-    const queryWords = searchQuery
-        .trim()
-        .toLowerCase()
-        .split(/\s+/)  // splits by one or more spaces
-        .filter(Boolean); // removes empty strings
-
-    const filteredPosts = queryWords.length > 0
-        ? sortedPosts.filter(post => {
-            const title = post.title?.toLowerCase() || '';
-            const tags = Object.values(post.tags || {}).map(tag => tag.toLowerCase());
-
-            return queryWords.some(word =>
-                title.includes(word) || tags.some(tag => tag.includes(word))
-            );
-        })
-        : sortedPosts;
 
     return (
         <div>
@@ -100,8 +78,8 @@ export default function AllPosts({ category = null, searchQuery = '', setSearchQ
 
 
             <div className={`post-list ${useRowView ? 'row-view' : 'card-view'}`}>
-                {filteredPosts.length > 0 ? (
-                    filteredPosts.map((post) =>
+                {sortedPosts.length > 0 ? (
+                    sortedPosts.map((post) =>
                         useRowView
                             ? <PostRow key={post.id} post={post} preview={true} />
                             : <PostCard key={post.id} post={post} preview={true} />)
