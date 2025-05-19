@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import './Header.css';
 import AppContext from '../../providers/AppContext';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -8,6 +8,12 @@ function Header() {
     const user = useContext(AppContext);
     const [input, setInput] = useState('');
     const navigate = useNavigate();
+
+    const searchRef = useRef();
+
+    const handleFocus = () => {
+        searchRef.current.select();
+    }
 
     const handleSearch = () => {
         const encodedQuery = encodeURIComponent(input);
@@ -23,11 +29,13 @@ function Header() {
                 <>
                     <input
                         className={`search-input`}
+                        ref={searchRef}
                         name='search'
                         type='text'
                         placeholder='Search everything...'
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
+                        onFocus={handleFocus}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 handleSearch();

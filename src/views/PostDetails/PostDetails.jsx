@@ -45,13 +45,13 @@ export default function PostDetails() {
         if (post) {
             const getUserId = async () => {
                 try {
-                    const snapshot = await getUserByHandle(post.author);
+                    const postAuthor = await getUserByHandle(post.author);
 
-                    if (!snapshot.exists()) {
+                    if (!postAuthor.exists()) {
                         throw new Error(`User not found for postId ${post.id}`);
                     }
 
-                    setAuthorId(snapshot.val().uid);
+                    setAuthorId(postAuthor.val().uid);
                 } catch (e) {
                     console.error('Error getting post author link:', e);
                 }
@@ -211,6 +211,21 @@ export default function PostDetails() {
         }
     };
 
+    const handleCommentAuthorLink = async (handle, commentId) => {
+        try {
+            const snapshot = await getUserByHandle(handle);
+    
+            if (!snapshot.exists()) {
+                throw new Error(`Author not found for commentId ${commentId}`);
+            }
+
+            navigate(`/account/${snapshot.val().uid}`);
+        }
+        catch (e) {
+            console.error('Failed getting link to author: ',  e);
+        }
+    }
+
     return (
         <div className="post-details">
             {!isEditing && (
@@ -331,7 +346,7 @@ export default function PostDetails() {
                             <div key={commentId} className="comment">
                                 <div className="comment-header">
                                     <p>
-                                        <strong onClick={() => navigate(`/account/${authorId}`)} style={{ cursor: 'pointer' }}>
+                                        <strong onClick={() => handleCommentAuthorLink(comment.author, commentId)} style={{ cursor: 'pointer' }}>
                                             {comment.author}
                                         </strong>{' '}
                                         — {new Date(comment.createdOn).toLocaleString()}
