@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import './SeachResults.css';
+import './SearchResults.css';
 import { useEffect, useState } from 'react';
 import Loader from '../../components/Loader/Loader';
 import { getAllComments, getAllPosts } from '../../services/posts.service';
@@ -9,7 +9,7 @@ import UserRow from '../../components/UserRow/UserRow';
 import PostRow from '../../components/PostRow/PostRow';
 import Select from 'react-select';
 
-function SeachResults() {
+function SearchResults() {
     const { query: rawQuery } = useParams();
 
     const [query, setQuery] = useState(null);
@@ -46,130 +46,83 @@ function SeachResults() {
         setContentSwitcher(content);
     };
 
-    const handleContentSort = (value) => {
-        setContent(prev => [...prev].sort((a, b) => {
-            if (contentSwitcher === 1) {
-                switch (value) {
-                    case 'date-desc':
-                        setSortBy({ value: 'date-desc', label: 'Newest first' });
-                        return new Date(b.createdOn) - new Date(a.createdOn);
-                    
-                    case 'date-asc':
-                        setSortBy({ value: 'date-asc', label: 'Oldest first' });
-                        return new Date(a.createdOn) - new Date(b.createdOn);
-                    
-                    case 'likes-desc':
-                        setSortBy({ value: 'likes-desc', label: 'Most likes' });
-                        return (b.likes || 0) - (a.likes || 0);
-
-                    case 'likes-asc':
-                        setSortBy({ value: 'likes-asc', label: 'Least likes' });
-                        return (a.likes || 0) - (b.likes || 0);
-
-                    case 'comments-desc':
-                        setSortBy({ value: 'date-desc', label: 'Newest first' });
-                        return (b.commentCount || 0) - (a.commentCount || 0);
-
-                    case 'comments-asc':
-                        setSortBy({ value: 'comments-desc', label: 'Most comments' });
-                        return (a.commentCount || 0) - (b.commentCount || 0);
-
-                    default:
-                        setSortBy({ value: 'comments-asc', label: 'Least comments' });
-                        return new Date(b.createdOn) - new Date(a.createdOn);
-                }
-            } else if (contentSwitcher === 2) {
-                switch (value) {
-                    case 'posts-desc':
-                        setSortBy({ value: 'posts-desc', label: 'Most posts' });
-                        return (Object.keys(b.posts ?? {}).length) - (Object.keys(a.posts ?? {}).length);
-                    
-                    case 'posts-asc':
-                        setSortBy({ value: 'posts-asc', label: 'Least posts' });
-                        return (Object.keys(a.posts ?? {}).length) - (Object.keys(b.posts ?? {}).length);
-
-                    case 'likes-desc':
-                        setSortBy({ value: 'likes-desc', label: 'Most likes' });
-                        return (Object.keys(b.likedPosts ?? {}).length) - (Object.keys(a.likedPosts ?? {}).length);
-
-                    case 'likes-asc':
-                        setSortBy({ value: 'likes-asc', label: 'Least likes' });
-                        return (Object.keys(a.likedPosts ?? {}).length) - (Object.keys(b.likedPosts ?? {}).length);
-
-                    case 'comments-desc':
-                        setSortBy({ value: 'date-desc', label: 'Newest first' });
-                        return (Object.keys(b.comments ?? {}).length) - (Object.keys(a.comments ?? {}).length);
-
-                    case 'comments-asc':
-                        setSortBy({ value: 'comments-desc', label: 'Most comments' });
-                        return (Object.keys(a.comments ?? {}).length) - (Object.keys(b.comments ?? {}).length);
-
-                    default:
-                        setSortBy({ value: 'comments-asc', label: 'Least comments' });
-                        return (Object.keys(b.posts ?? {}).length) - (Object.keys(a.posts ?? {}).length);
-                }
-            } else {
-                switch (value) {
-                    case 'date-desc':
-                        setSortBy({ value: 'date-desc', label: 'Newest first' });
-                        return new Date(b.createdOn) - new Date(a.createdOn);
-                    
-                    case 'date-asc':
-                        setSortBy({ value: 'date-asc', label: 'Oldest first' });
-                        return new Date(a.createdOn) - new Date(b.createdOn);
-                    
-                    case 'likes-desc':
-                        setSortBy({ value: 'likes-desc', label: 'Most likes' });
-                        return (b.likes || 0) - (a.likes || 0);
-
-                    case 'likes-asc':
-                        setSortBy({ value: 'likes-asc', label: 'Least likes' });
-                        return (a.likes || 0) - (b.likes || 0);
-
-                    default:
-                        setSortBy({ value: 'date-desc', label: 'Newest first' });
-                        return new Date(b.createdOn) - new Date(a.createdOn);
-                }
-            }
-        }));
-    }
-
-    const handleSortOptions = () => {
-        if (contentSwitcher === 1) {
-            return [
+    const sortConfig = {
+        1: {
+            options: [
                 { value: 'date-desc', label: 'Newest first' },
                 { value: 'date-asc', label: 'Oldest first' },
                 { value: 'likes-desc', label: 'Most likes' },
                 { value: 'likes-asc', label: 'Least likes' },
                 { value: 'comments-desc', label: 'Most comments' },
                 { value: 'comments-asc', label: 'Least comments' },
-            ];
-        }
-        if (contentSwitcher === 2) {
-            return [
+            ],
+            sorting: {
+                'date-desc': (a, b) => new Date(b.createdOn) - new Date(a.createdOn),
+                'date-asc': (a, b) => new Date(a.createdOn) - new Date(b.createdOn),
+                'likes-desc': (a, b) => (b.likes || 0) - (a.likes || 0),
+                'likes-asc': (a, b) => (a.likes || 0) - (b.likes || 0),
+                'comments-desc': (a, b) => (b.commentCount || 0) - (a.commentCount || 0),
+                'comments-asc': (a, b) => (a.commentCount || 0) - (b.commentCount || 0),
+            },
+        },
+        2: {
+            options: [
                 { value: 'posts-desc', label: 'Most posts' },
                 { value: 'posts-asc', label: 'Least posts' },
                 { value: 'likes-desc', label: 'Most likes' },
                 { value: 'likes-asc', label: 'Least likes' },
                 { value: 'comments-desc', label: 'Most comments' },
                 { value: 'comments-asc', label: 'Least comments' },
-            ];
-        }
-        if (contentSwitcher === 3) {
-            return [
+            ],
+            sorting: {
+                'posts-desc': (a, b) => Object.keys(b.posts || {}).length - Object.keys(a.posts || {}).length,
+                'posts-asc': (a, b) => Object.keys(a.posts || {}).length - Object.keys(b.posts || {}).length,
+                'likes-desc': (a, b) => Object.keys(b.likedPosts || {}).length - Object.keys(a.likedPosts || {}).length,
+                'likes-asc': (a, b) => Object.keys(a.likedPosts || {}).length - Object.keys(b.likedPosts || {}).length,
+                'comments-desc': (a, b) => Object.keys(b.comments || {}).length - Object.keys(a.comments || {}).length,
+                'comments-asc': (a, b) => Object.keys(a.comments || {}).length - Object.keys(b.comments || {}).length,
+            },
+        },
+        3: {
+            options: [
                 { value: 'date-desc', label: 'Newest first' },
                 { value: 'date-asc', label: 'Oldest first' },
                 { value: 'likes-desc', label: 'Most likes' },
                 { value: 'likes-asc', label: 'Least likes' },
-            ];
-        }
+            ],
+            sorting: {
+                'date-desc': (a, b) => new Date(b.createdOn) - new Date(a.createdOn),
+                'date-asc': (a, b) => new Date(a.createdOn) - new Date(b.createdOn),
+                'likes-desc': (a, b) => (b.likes || 0) - (a.likes || 0),
+                'likes-asc': (a, b) => (a.likes || 0) - (b.likes || 0),
+            },
+        },
+    };
+
+    const defaultSorting = {
+        1: 'date-desc',
+        2: 'posts-desc',
+        3: 'date-desc',
+    };
+
+    const handleContentSort = (value) => {
+        const config = sortConfig[contentSwitcher];
+
+        setSortBy(config.options.find(option => option.value === value));
+        setContent(prev => [...prev].sort(config.sorting[value]));
     }
+
+    const getSortOptions = () => sortConfig[contentSwitcher].options || 0;
 
     useEffect(() => {
         if (query) {
             const loadContent = async () => {
                 try {
                     let content = [];
+
+                    let defaultSort = defaultSorting[contentSwitcher];
+                    setSortOptions(getSortOptions());
+
                     const normalisedQuery = query.toLowerCase();
                     const posts = await getAllPosts();
                     const users = await getAllUsers();
@@ -193,6 +146,7 @@ function SeachResults() {
 
                             return titleMatches || bodyMatches || tagMatches;
                         });
+
                         setSortBy({ value: 'date-desc', label: 'Newest first' });
                     }
 
@@ -219,8 +173,7 @@ function SeachResults() {
                         setSortBy({ value: 'date-desc', label: 'Newest first' });
                     }
 
-                    setContent(content);
-                    setSortOptions(handleSortOptions());
+                    setContent(content.sort(sortConfig[contentSwitcher].sorting[defaultSort]));
 
                     await new Promise((resolve) => setTimeout(resolve, 300));
                     toggleContentDelay(false);
@@ -361,4 +314,4 @@ function SeachResults() {
     );
 }
 
-export default SeachResults;
+export default SearchResults;

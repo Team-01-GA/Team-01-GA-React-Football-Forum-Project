@@ -15,7 +15,7 @@ import FantasyPremierLeague from './views/FantasyPremierLeague/FantasyPremierLea
 import PostDetails from './views/PostDetails/PostDetails';
 import AccountPage from './views/AccountPage/AccountPage';
 import Loader from './components/Loader/Loader';
-import SeachResults from './views/SearchResults/SeachResults';
+import SearchResults from './views/SearchResults/SearchResults';
 
 
 function App() {
@@ -72,14 +72,14 @@ function App() {
                         }
                         {appState.user &&
                             <>
-                                <Route path='/' element={<AllPosts searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
+                                <Route path='/' element={<AllPosts />} />
                                 <Route path='/create-post' element={<CreatePost />} />
-                                <Route path="/premier-league" element={<PremierLeague searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
-                                <Route path="/fantasy-premier-league" element={<FantasyPremierLeague searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
+                                <Route path="/premier-league" element={<PremierLeague />} />
+                                <Route path="/fantasy-premier-league" element={<FantasyPremierLeague />} />
                                 <Route path="/posts/:postId" element={<PostDetails />} />
                                 <Route path='/account' element={<AccountPage />} />
                                 <Route path='/account/:userId' element={<AccountPage />} />
-                                <Route path='/search/:query' element={<SeachResults />}/>
+                                <Route path='/search/:query' element={<SearchResults />}/>
                                 <Route path='*' element={<HomePage />} />
                             </>
                         }
