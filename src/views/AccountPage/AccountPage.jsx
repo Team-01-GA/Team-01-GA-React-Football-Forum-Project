@@ -9,6 +9,7 @@ import {
     getUserData,
     toggleUserBlock,
     updateUserEmail,
+    updateUserNamePref,
 } from '../../services/user.service';
 import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../../components/Loader/Loader';
@@ -24,7 +25,8 @@ function AccountPage() {
     const [contentSwitcherHighlight, setContentSwitcherHighlight] = useState(1);
     const [message, setMessage] = useState(null);
     const [editMode, setEditMode] = useState(false);
-    const [emailValue, setEmailValue] = useState('');
+    const [userPrefersName, setUserPrefersName] = useState(null);
+    const [email, setEmail] = useState('');
     const [userToView, setUserToView] = useState(null);
     const [userNotFound, setUserNotFound] = useState(false);
     const [isUserBlocked, setUserBlocked] = useState(false);
@@ -83,6 +85,9 @@ function AccountPage() {
                     numberOfComments: Object.keys(user.comments ?? {}).length,
                     numberOfLikes: Object.keys(user.likedPosts ?? {}).length,
                 });
+
+                setUserPrefersName(user?.prefersFullName ?? false);
+                setEmail(user.email);
             } catch (e) {
                 console.error('Failed to fetch user', e);
                 setUserNotFound(true);
@@ -126,40 +131,49 @@ function AccountPage() {
         () => greetings[Math.floor(Math.random() * greetings.length)]
     );
 
-    const handleEmailChange = async (e) => {
-        if (e.key === 'Enter') {
-            setLoadingAnim((prev) => ({ ...prev, accButton: true }));
-            setMessage(false);
+    const handleUserEdits = async () => {
+        setLoadingAnim((prev) => ({ ...prev, accButton: true }));
+        setMessage(false);
 
-            const normalisedEmail = e.target.value.toLowerCase();
+        const normalisedEmail = email.toLowerCase();
+        const namePreference = userPrefersName;
 
-            if (
-                !normalisedEmail ||
-                !normalisedEmail.includes('@') ||
-                !normalisedEmail.includes('.')
-            ) {
-                return setMessage('Please enter a valid email address.');
-            }
-
-            try {
-                await updateUserEmail(user.userData.handle, normalisedEmail);
-
-                setContext((prev) => ({
-                    ...prev,
-                    userData: {
-                        ...prev.userData,
-                        email: normalisedEmail,
-                    },
-                }));
-
-                setEditMode(false);
-                setMessage('Email updated succesfully!');
-            } catch (e) {
-                setMessage(e.message);
-            }
-
-            setLoadingAnim((prev) => ({ ...prev, accButton: false }));
+        if (
+            (!normalisedEmail ||
+            !normalisedEmail.includes('@') ||
+            !normalisedEmail.includes('.')) &&
+            normalisedEmail !== user.userData.email
+        ) {
+            return setMessage('Please enter a valid email address.');
         }
+
+        try {
+            if (normalisedEmail !== user.userData.email) {
+                await updateUserEmail(user.userData.handle, normalisedEmail);
+            }
+            if (namePreference !== userToView?.prefersFullName) {
+                await updateUserNamePref(user.userData.handle, namePreference);
+            }
+
+            setContext((prev) => ({
+                ...prev,
+                userData: {
+                    ...prev.userData,
+                    email: normalisedEmail,
+                    prefersFullName: namePreference,
+                },
+            }));
+
+            setEditMode(false);
+            setMessage('Edits saved.');
+        } catch (e) {
+            if (e.message.includes('requires-recent-login')) {
+                setMessage('You need to be logged in for less than 5 minutes to change your email. Please sign out and log back in.');
+                return
+            }
+        }
+
+        setLoadingAnim((prev) => ({ ...prev, accButton: false }));
     };
 
     const handleUserBlock = async () => {
@@ -268,61 +282,77 @@ function AccountPage() {
 
     return (
         <div id="acc-wrapper">
+            <div id='edit-mode-backdrop' className={editMode ? 'editing' : ''} onClick={() => setEditMode(false)}></div>
             {loggedInUser && accImgPicker && (
                 <AccountPicture
                     hideImgPicker={setAccImgPicker}
                     setAccPic={setAccPic}
                 />
             )}
-            <div id="main-acc-info">
+            <div id="main-acc-info" className={editMode ? 'editing' : ''}>
                 {accPic ? (
                     <img
-                        onClick={() => setAccImgPicker(true)}
+                        onClick={() => editMode ? setAccImgPicker(true) : ''}
                         src={accPic}
                         alt="profile picture"
-                        className={`acc-img ${
-                            !loggedInUser && 'acc-img-inactive'
-                        }`}
+                        className={`acc-img 
+                            ${editMode ? 'editing' : ''}    
+                        `}
                     />
                 ) : (
                     <div
-                        onClick={() => setAccImgPicker(true)}
-                        className={`acc-img-placeholder ${
-                            !loggedInUser && 'acc-img-inactive'
-                        }`}
+                        onClick={() => editMode ? setAccImgPicker(true) : ''}
+                        className={`acc-img-placeholder  
+                            ${editMode ? 'editing' : ''}
+                        `}
                     >
                         <p>?</p>
                     </div>
                 )}
                 {loggedInUser ? (
                     <>
-                        <p className="acc-email">{user.userData.email}</p>
                         {!editMode ? (
-                            <button
-                                className={
-                                    loadingAnim.accButton
-                                        ? 'rotating-border-loading'
-                                        : ''
-                                }
-                                onClick={() => setEditMode(true)}
-                                disabled={stopButton}
-                            >
-                                Edit
-                            </button>
+                            <>
+                                <p className="acc-email">{user.userData.email}</p>
+                                <button
+                                    id='acc-edit-button'
+                                    className={
+                                        loadingAnim.accButton
+                                            ? 'rotating-border-loading'
+                                            : ''
+                                    }
+                                    onClick={() => setEditMode(true)}
+                                    disabled={stopButton}
+                                >
+                                    Account Settings
+                                </button>
+                            </>
                         ) : (
                             <input
+                                id='email-change'
                                 placeholder="New Email"
                                 type="email"
-                                value={emailValue}
-                                onChange={(e) => setEmailValue(e.target.value)}
-                                onKeyDown={(e) => handleEmailChange(e)}
+                                defaultValue={user.userData.email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                         )}
                         {message && <p className="acc-message">{message}</p>}
-                        <p className="greeting">
-                            {greeting}
-                            {userToView.firstName} {userToView.lastName}
-                        </p>
+                        <div className="greeting">
+                            {editMode 
+                                ? <div id='acc-preferences-wrapper'>
+                                    <p>Prefer:</p>
+                                    <div className={`acc-preferences ${userPrefersName ? 'active' : ''}`} onClick={() => setUserPrefersName(true)}>
+                                        <p>{userToView.firstName} {userToView.lastName}</p>
+                                        <span>First, last name</span>
+                                    </div>
+                                    <div className={`acc-preferences ${!userPrefersName ? 'active' : ''}`} onClick={() => setUserPrefersName(false)}>
+                                        <p>{userToView.handle}</p>
+                                        <span>Username</span>
+                                    </div>
+                                </div>
+                                : <><p>{greeting}</p><p>{userPrefersName ? `${userToView.firstName} ${userToView.lastName}` : userToView.handle}</p></>
+                            }
+                        </div>
                     </>
                 ) : (
                     <>
@@ -348,6 +378,8 @@ function AccountPage() {
                         {message && <p className="acc-message">{message}</p>}
                     </>
                 )}
+                {editMode && <button className='save-edits-button' onClick={() => handleUserEdits()}>Save changes</button>}
+            </div>
                 <div id="acc-details">
                     <p className="acc-detail">
                         {userToView.isAdmin ? 'Admin' : 'User'}
@@ -365,7 +397,6 @@ function AccountPage() {
                         Likes: {accDetails.numberOfLikes}
                     </p>
                 </div>
-            </div>
             <div id="acc-content-switcher">
                 <div className="button-container">
                     <button

@@ -42,6 +42,7 @@ export const createUserObject = async (
         email,
         isAdmin: false,
         isBlocked: false,
+        prefersFullName: false,
         createdOn: Date.now(),
     });
 };
@@ -59,6 +60,10 @@ export const updateUserEmail = async (handle, newEmail) => {
         });
     });
 };
+
+export const updateUserNamePref = async (handle, boolean) => {
+    await update(ref(db, `users/${handle}`), { prefersFullName: boolean });
+}
 
 export const getUserData = async (uid) => {
     return get(query(ref(db, 'users'), orderByChild('uid'), equalTo(uid)));

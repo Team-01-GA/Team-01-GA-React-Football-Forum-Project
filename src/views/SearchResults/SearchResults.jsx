@@ -236,6 +236,7 @@ function SearchResults() {
             backgroundColor: 'rgb(225, 218, 218)',
             color: 'black',
             marginLeft: '20px',
+            
         }),
         option: (base, state) => ({
             ...base,

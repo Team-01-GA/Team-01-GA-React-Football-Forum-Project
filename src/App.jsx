@@ -26,8 +26,6 @@ function App() {
 
     const [user, loading, error] = useAuthState(auth);
 
-    const [searchQuery, setSearchQuery] = useState('');
-
     useEffect(() => {
         if (appState.user !== user) {
             setAppState({ user });
@@ -79,6 +77,7 @@ function App() {
                                 <Route path="/posts/:postId" element={<PostDetails />} />
                                 <Route path='/account' element={<AccountPage />} />
                                 <Route path='/account/:userId' element={<AccountPage />} />
+                                <Route path='/search/' element={<SearchResults />}/>
                                 <Route path='/search/:query' element={<SearchResults />}/>
                                 <Route path='*' element={<HomePage />} />
                             </>
