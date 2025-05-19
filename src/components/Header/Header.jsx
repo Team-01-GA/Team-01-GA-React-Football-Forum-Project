@@ -9,6 +9,11 @@ function Header() {
     const [input, setInput] = useState('');
     const navigate = useNavigate();
 
+    const handleSearch = () => {
+        const encodedQuery = encodeURIComponent(input);
+        navigate(`/search/${encodedQuery}`);
+    }
+
     return (
         <div id="header">
             <NavLink className='home' to='/'><h1>React Fantasy Football Forum</h1></NavLink>
@@ -25,7 +30,7 @@ function Header() {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                                navigate(`/search/${input}`);
+                                handleSearch();
                             }
                         }}
                     />
