@@ -103,11 +103,20 @@ export default function PostCard({
                     {post?.postImg && <img src={post.postImg} style={{ width: '100%' }} />}
 
                     {post.tags && (
-                        <p>
-                            <strong>Tags:</strong>
-                            {' ['}
-                            {Object.values(post.tags).join(', ')}
-                            {']'}
+                        <p className="tags">
+                            <strong>Tags:</strong>{' '}
+                            {Object.values(post.tags).map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="clickable-tag"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/search/${ tag }`);
+                                    }}
+                                >
+                                    #{tag}
+                                </span>
+                            ))}
                         </p>
                     )}
                 </div>
