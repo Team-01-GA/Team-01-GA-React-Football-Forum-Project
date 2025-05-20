@@ -48,9 +48,7 @@ export default function Login({ setError, active }) {
             <input name='email-login' placeholder='Email' type="email" value={fields.email} onChange={e => saveInputs('email', e.target.value)}/>
             <input name='password-login' placeholder='Password' type="password" value={fields.password} onChange={e => saveInputs('password', e.target.value)}/>
             <input type="text" style={{ visibility: 'hidden' }} readOnly disabled />
-            <input type="text" style={{ visibility: 'hidden' }} readOnly disabled />
-            <input type="text" style={{ visibility: 'hidden' }} readOnly disabled />
-            <button onClick={onLogin}>Sign in</button>
+            <button className='auth-submit' onClick={onLogin}>Sign in</button>
         </div>
     );
 };

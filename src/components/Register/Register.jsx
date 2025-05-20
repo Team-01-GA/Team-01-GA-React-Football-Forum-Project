@@ -76,12 +76,14 @@ export default function Registration({ setError, active }) {
     return (
         <div className={`register-form ${active ? 'auth-active' : ''}`}>
             <h3 className='auth-title'>Get Started</h3>
-            <input name='first-name' placeholder='First Name' type="text" value={fields.firstName} onChange={e => saveInputs('firstName', e.target.value)}/>
-            <input name='last-name' placeholder='Last Name' type="text" value={fields.lastName} onChange={e => saveInputs('lastName', e.target.value)}/>
+            <div className='auth-names'>
+                <input name='first-name' placeholder='First Name' type="text" value={fields.firstName} onChange={e => saveInputs('firstName', e.target.value)}/>
+                <input name='last-name' placeholder='Last Name' type="text" value={fields.lastName} onChange={e => saveInputs('lastName', e.target.value)}/>
+            </div>
             <input name='handle' placeholder='Username' type="text" value={fields.handle} onChange={e => saveInputs('handle', e.target.value)}/>
             <input name='email-register' placeholder='Email' type="email" value={fields.email} onChange={e => saveInputs('email', e.target.value)}/>
             <input name='password-register' placeholder='Password' type="password" value={fields.password} onChange={e => saveInputs('password', e.target.value)}/>
-            <button onClick={onRegister}>Sign up</button>
+            <button className='auth-submit' onClick={onRegister}>Sign up</button>
         </div>
     );
 };

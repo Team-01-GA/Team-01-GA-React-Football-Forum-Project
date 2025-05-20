@@ -1,11 +1,8 @@
-function AuthError({ setError, message }) {
+function AuthError({ message }) {
     return (
-        <div id="auth-error">
+        <div id="auth-error" className="glassmorphic-bg">
             <div id="message">
                 <p>{message}</p>
-            </div>
-            <div id="auth-error-close">
-                <button onClick={() => setError(null)}>X</button>
             </div>
         </div>
     );

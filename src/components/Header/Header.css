@@ -58,26 +58,6 @@
     font-weight: lighter;
     transition: all 0.5s;
     outline: 4px solid transparent;
-    animation: outlinePulse 4s ease infinite;
-}
-
-@keyframes outlinePulse {
-    0% {
-        outline: 4px solid transparent;
-    }
-
-    50% {
-        outline: 4px solid red;
-    }
-
-    100% {
-        outline: 4px solid transparent;
-    }
-}
-
-#header .create-post:hover {
-    border: 2px solid red;
-    cursor: pointer;
 }
 
 .divider {
@@ -90,26 +70,17 @@
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transition: opacity 0.8s ease;
+    transition: all 0.3s ease;
 
-    padding: 10px 11px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
+    padding: 10px 20px 10px 10px;
+    font-size: 1em;
+    border-radius: 15px;
     width: 130px;
     max-width: 100%;
     outline: none;
+    border: none;
 }
-
-.search-input.hidden {
-    opacity: 0;
-    transition: opacity 0.8s ease, visibility 0s linear 0.8s, pointer-events 0s linear 0.8s;
-    visibility: hidden;
-    pointer-events: none;
-}
-
 
 .search-input:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    padding: 10px 50px 10px 10px;
 }
