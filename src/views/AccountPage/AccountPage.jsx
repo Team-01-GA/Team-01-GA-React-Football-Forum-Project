@@ -356,7 +356,7 @@ function AccountPage() {
                     </>
                 ) : (
                     <>
-                        <p className="acc-name">{userToView.handle}</p>
+                        <p className="acc-name">{userToView?.prefersFullName ? `${userToView?.firstName} ${userToView?.lastName}` : userToView.handle}</p>
                         {!user.userData.isAdmin ? (
                             ''
                         ) : userToView.isAdmin ? (

@@ -16,10 +16,12 @@ export default function PostCard({
     const [likeCount, setLikeCount] = useState(post.likes || 0);
     const [isLiking, setIsLiking] = useState(false);
     const [authorId, setAuthorId] = useState(null);
+    const [prefersName, setPrefersName] = useState(false);
+    const [authorFullName, setAuthorFullName] = useState('');
 
     useEffect(() => {
         if (post) {
-            const getUserId = async () => {
+            const getAuthorData = async () => {
                 try {
                     const snapshot = await getUserByHandle(post.author);
 
@@ -27,13 +29,21 @@ export default function PostCard({
                         throw new Error(`User not found for postId ${post.id}`);
                     }
 
-                    setAuthorId(snapshot.val().uid);
+                    const user = snapshot.val();
+
+                    setAuthorId(user.uid);
+                    setPrefersName(user?.prefersFullName);
+
+                    if (user?.prefersFullName) {
+                        setAuthorFullName(`${user?.firstName} ${user?.lastName}`);
+                    }
+
                 } catch (e) {
                     console.error('Error getting post author link:', e);
                 }
             };
 
-            getUserId();
+            getAuthorData();
         }
     }, [post]);
 
@@ -90,7 +100,7 @@ export default function PostCard({
 
             {!preview && (
                 <p onClick={() => navigate(`/account/${authorId}`)}>
-                    <strong>By:</strong> {post.author}
+                    <strong>By:</strong> {prefersName ? authorFullName : post.author}
                 </p>
             )}
 

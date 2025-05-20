@@ -213,6 +213,11 @@
     font-size: 2em;
 }
 
+#acc-edit-button {
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
 #edit-mode-backdrop {
     position: fixed;
     top: 0;
