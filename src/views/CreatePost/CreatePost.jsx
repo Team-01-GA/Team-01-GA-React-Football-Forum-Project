@@ -1,18 +1,29 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import AppContext from '../../providers/AppContext';
 import { addPost, uploadPostImage } from '../../services/posts.service';
+import './CreatePost.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function CreatePost() {
     const [fields, setFields] = useState({
         title: '',
         content: '',
-        category: '',
+        category: 'global',
         tags: '',
     });
+    const [fieldError, setFieldError] = useState({
+        title: null,
+        content: null,
+        tags: null,
+    })
+    const [category, setCategory] = useState(1);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [postId, setPostId] = useState(null);
 
     const { userData } = useContext(AppContext);
+
+    const navigate = useNavigate();
 
     const fileInputRef = useRef();
 
@@ -36,6 +47,20 @@ export default function CreatePost() {
         reader.readAsDataURL(file);
     };
 
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const file = e.dataTransfer.files[0];
+        handleFile(file);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleClick = () => fileInputRef.current.click();
+
     const handleUploadFile = async (postId) => {
         if (selectedFile) {
             try {
@@ -46,27 +71,59 @@ export default function CreatePost() {
         }
     };
 
-    const handleRemoveFile = () => {
+    const handleRemove = (e) => {
+        e ? e.stopPropagation() : null;
         setSelectedFile(null);
         setPreviewUrl(null);
         fileInputRef.current.value = null;
     };
 
+    const handleCategorySwitch = (categoryNum) => {
+        let category = null;
+        setCategory(categoryNum);
+        switch (categoryNum) {
+            case 1:
+                category = 'global';
+                break;
+            case 2:
+                category = 'premier-league';
+                break;
+            case 3:
+                category = 'fantasy-premier-league';
+                break;
+
+            default:
+                category = 'global';
+        }
+        setFields((prev) => ({ ...prev, category: category }));
+    };
+
+    const handleFieldError = async (field, message) => {
+        setFieldError(prev => ({...prev, [field]: message}));
+        await new Promise(resolve => setTimeout(resolve, 6000));
+        setFieldError(prev => ({...prev, [field]: null}));
+    }
+
     const handleCreatePost = async () => {
-        if (!fields.title || !fields.content) {
-            return alert('Please fill in all fields');
+        let hasError = null;
+        if (!fields.title) {
+            handleFieldError('title', 'Please provide a title.');
+            hasError = true;
+        }
+
+        if (!fields.content) {
+            handleFieldError('content', 'Please provide a body.');
+            hasError = true;
         }
 
         if (fields.title.length < 16 || fields.title.length > 64) {
-            return alert('Title must be between 16 and 64 symbols.');
+            handleFieldError('title', 'Title must be between 16 and 64 symbols.');
+            hasError = true;
         }
 
         if (fields.content.length < 32 || fields.content.length > 8192) {
-            return alert('Text content must be between 32 and 8192 symbols.');
-        }
-
-        if (!fields.category) {
-            return alert('Please select a category');
+            handleFieldError('content', 'Text content must be between 32 and 8192 symbols.');
+            hasError = true;
         }
 
         const tagsArray = fields.tags
@@ -75,9 +132,12 @@ export default function CreatePost() {
             .filter((tag) => tag && tag.length <= 32);
 
         if (tagsArray.length < 3) {
-            return alert(
-                'Please provie at least three tags, each up to 32 symbols'
-            );
+            handleFieldError('tags', 'Please provie at least three tags, each up to 32 symbols, seperated by a comma and a space.');
+            hasError = true;
+        }
+
+        if (hasError) {
+            return;
         }
 
         try {
@@ -89,87 +149,158 @@ export default function CreatePost() {
                 tagsArray
             );
             handleUploadFile(postId);
+            setPostId(postId);
             setFields({ title: '', content: '', category: '', tags: '' });
-            handleRemoveFile();
-            alert('Post created successfully!');
+            handleRemove();
         } catch (error) {
             console.error('Error creating post:', error);
             alert('Failed to create post. Please try again.');
         }
     };
 
-    if (userData.isBlocked) {
-        return <p>You are blocked. You cannot post.</p>;
+    const goToPost = (e) => {
+        e.stopPropagation();
+        navigate(`/posts/${postId}`);
+    };
+
+    if (userData?.isBlocked) {
+        return (
+            <div id="user-blocked" className="glassmorphic-bg">
+                You are blocked. You cannot post.
+            </div>
+        );
     }
 
     return (
-        <>
-            <h2>Create Post</h2>
+        <div id="create-post-wrapper">
+            {postId && (
+                <div id="post-created-backdrop" onClick={() => setPostId(null)}>
+                    <div id="post-created" className="glassmorphic-bg">
+                        <h1>Post created successfully!</h1>
+                        <button onClick={(e) => goToPost(e)}>Go to post</button>
+                    </div>
+                </div>
+            )}
+            <h1 id="create-post-heading">Create Post</h1>
 
-            <label htmlFor="title">Title: </label>
-            <input
-                value={fields.title}
-                onChange={(e) => handleUpdateValue('title', e.target.value)}
-                type="text"
-                name="title"
-                id="title"
-            />
-            <br />
-            <br />
+            <div id="create-post-form" className="glassmorphic-bg">
+                <div className="create-post-title">
+                    <label htmlFor="title">Title: </label>
+                    {fieldError.title && <p className='field-error'>{fieldError.title}</p>}
+                    <input
+                        value={fields.title}
+                        onChange={(e) =>
+                            handleUpdateValue('title', e.target.value)
+                        }
+                        type="text"
+                        name="title"
+                        id="title"
+                    />
+                </div>
+                <div className="create-post-category">
+                    <p>Category: </p>
+                    <div className="category-switch-wrapper">
+                        <button
+                            className={`category-switch ${
+                                category === 1 ? 'category-active' : ''
+                            }`}
+                            onClick={() => handleCategorySwitch(1)}
+                        >
+                            Global
+                        </button>
+                        <button
+                            className={`category-switch ${
+                                category === 2 ? 'category-active' : ''
+                            }`}
+                            onClick={() => handleCategorySwitch(2)}
+                        >
+                            Premier League
+                        </button>
+                        <button
+                            className={`category-switch ${
+                                category === 3 ? 'category-active' : ''
+                            }`}
+                            onClick={() => handleCategorySwitch(3)}
+                        >
+                            Fantasy Premier League
+                        </button>
+                    </div>
+                </div>
+                <div className="create-post-content">
+                    <label htmlFor="content">Content: </label>
+                    {fieldError.content && <p className='field-error'>{fieldError.content}</p>}
+                    <textarea
+                        value={fields.content}
+                        onChange={(e) =>
+                            handleUpdateValue('content', e.target.value)
+                        }
+                        name="content"
+                        id="content"
+                        cols="30"
+                        rows="10"
+                    />
+                </div>
 
-            <label htmlFor="category">Category: </label>
-            <select
-                name="category"
-                id="category"
-                value={fields.category}
-                onChange={(e) => handleUpdateValue('category', e.target.value)}
-            >
-                <option value="">Select category</option>
-                <option value="premier-league">Premier League</option>
-                <option value="fantasy-premier-league">
-                    Fantasy Premier League
-                </option>
-            </select>
-            <br />
-            <br />
+                <div className="create-post-image">
+                    <div
+                        className="drop-area"
+                        onClick={handleClick}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                    >
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            onChange={(e) => handleFile(e.target.files[0])}
+                            style={{ display: 'none' }}
+                        />
+                        {!previewUrl ? (
+                            <p>Click or drag an image here</p>
+                        ) : (
+                            <div className="preview-container">
+                                <img
+                                    src={previewUrl}
+                                    alt="Preview"
+                                    className="preview-image"
+                                />
+                            </div>
+                        )}
+                        {previewUrl && (
+                            <>
+                                <button
+                                    onClick={(e) => handleRemove(e)}
+                                    className="remove-button"
+                                >
+                                    Remove
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
 
-            <label htmlFor="content">Content: </label>
-            <textarea
-                value={fields.content}
-                onChange={(e) => handleUpdateValue('content', e.target.value)}
-                name="content"
-                id="content"
-                cols="30"
-                rows="10"
-            />
-            <br />
-            <br />
+                <div className="create-post-tags">
+                    <label htmlFor="tags">Tags:</label>
+                    {fieldError.tags && <p className='field-error'>{fieldError.tags}</p>}
+                    <input
+                        type="text"
+                        name="tags"
+                        id="tags"
+                        placeholder="Enter tags, separated by commas and a space. (Tags character limit: 32)"
+                        value={fields.tags}
+                        onChange={(e) =>
+                            handleUpdateValue('tags', e.target.value)
+                        }
+                    />
+                </div>
 
-            <label htmlFor="image">Image: </label>
-            <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={(e) => handleFile(e.target.files[0])}
-            />
-            {previewUrl && <img src={previewUrl} style={{ width: '20%' }} />}
-            {selectedFile && <button onClick={() => handleRemoveFile()}>Remove file</button>}
-            <br />
-            <br />
-
-            <label htmlFor="tags">Tags:</label>
-            <input
-                type="text"
-                name="tags"
-                id="tags"
-                placeholder="Enter tags, separated by commas and a space. (Tags character limit: 32)"
-                value={fields.tags}
-                onChange={(e) => handleUpdateValue('tags', e.target.value)}
-            />
-            <br />
-            <br />
-
-            <button onClick={handleCreatePost}>Create</button>
-        </>
+                <button
+                    className="create-post-submit"
+                    onClick={handleCreatePost}
+                >
+                    Create
+                </button>
+            </div>
+        </div>
     );
 }

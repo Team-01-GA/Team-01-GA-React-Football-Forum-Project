@@ -1,0 +1,229 @@
+#create-post-heading {
+    text-align: center;
+    width: 250px;
+    padding: 6px;
+    margin-top: 100px;
+    margin-bottom: 50px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#create-post-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    grid-template-areas:
+        'title image'
+        'category image'
+        'content image'
+        'tags tags'
+        'submit submit';
+    gap: 25px;
+    padding: 20px;
+    border-radius: 15px;
+
+    & input {
+        padding: 20px 10px;
+        border-radius: 15px;
+        border: none;
+        outline: none;
+        transition: all 0.3s ease;
+        font-size: 1em;
+        width: 100%;
+    }
+
+    & label {
+        margin: 0 0 5px 5px;
+        font-size: 1.5em;
+    }
+
+    & textarea {
+        border-radius: 15px;
+        border: none;
+        outline: none;
+        font-size: 1em;
+        padding: 20px 10px;
+        font-family: inherit;
+        width: 100%;
+    }
+}
+
+.create-post-title,
+.create-post-category,
+.create-post-content,
+.create-post-tags {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.create-post-title {
+    grid-area: title;
+}
+
+.create-post-category {
+    display: flex;
+    flex-direction: row;
+    grid-area: category;
+    gap: 20px;
+
+    & p {
+        margin: 0 0 0 5px;
+        font-size: 1.5em;
+        align-self: center;
+        width: fit-content;
+    }
+}
+
+.create-post-category button {
+    padding: 20px 20px;
+    border: none;
+    outline: none;
+    border: 2px solid white;
+    background-color: transparent;
+    color: white;
+    border-radius: 15px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    height: fit-content;
+}
+
+.create-post-category button:hover {
+    background-color: white;
+    color: black;
+}
+
+.create-post-category button.category-active {
+    background-color: white;
+    color: black;
+}
+
+.category-switch-wrapper {
+    display: flex;
+    justify-content: start;
+    gap: 30px;
+    width: 100%;
+}
+
+.create-post-content {
+    grid-area: content;
+}
+
+.create-post-tags {
+    grid-area: tags;
+}
+
+.create-post-image {
+    grid-area: image;
+}
+
+.create-post-image .drop-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 85%;
+}
+
+.create-post-image .preview-container {
+    width: 80%;
+}
+
+.create-post-image .preview-container img {
+    border-radius: 15px;
+    width: 100%;
+    height: 300px;
+}
+
+.create-post-submit {
+    padding: 20px 50px;
+    font-size: 1em;
+    border: none;
+    outline: none;
+    justify-self: flex-end;
+    width: fit-content;
+    border-radius: 15px;
+    grid-area: submit;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.create-post-submit:hover {
+    padding: 20px 70px;
+}
+
+.field-error {
+    margin: 0 0 0 10px;
+    font-size: 1.3em;
+    animation: errorInOut 6s ease forwards;
+    color: rgba(255, 255, 255, 0.62);
+    align-self: center;
+}
+
+@keyframes errorInOut {
+    0% {
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+    }
+    85% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+#post-created-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 99;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#post-created {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    gap: 10px;
+    opacity: 0;
+    animation: createdFadeIn 0.5s ease forwards;
+
+    & h1 {
+        margin: 0;
+    }
+
+    & button {
+        padding: 20px 30px;
+        font-size: 1.5em;
+        border: none;
+        outline: none;
+        border-radius: 15px;
+        width: 70%;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+}
+
+@keyframes createdFadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+#post-created button:hover {
+    width: 80%;
+}

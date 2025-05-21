@@ -245,7 +245,6 @@
     z-index: 1000;
     outline: 2px solid white;
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
-    /* box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); */
     padding: 50px;
     margin: 50px;
 }

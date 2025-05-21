@@ -15,7 +15,7 @@ export default function AllPosts({ category = null }) {
             try {
                 const result = await getAllPosts();
                 const filtered = category
-                    ? result.filter((post) => post.category === category)
+                    ? result.filter((post) => post.category === category || post.category === 'global')
                     : result;
                 setPosts(filtered);
             } catch (err) {

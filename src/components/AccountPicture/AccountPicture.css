@@ -64,14 +64,14 @@
 
 .remove-button {
     padding: 10px 20px;
-    background-color: rgba(255, 0, 0, 0.1);
+    background-color: rgba(255, 33, 33, 0.274);
     color: white;
     border: none;
     border-bottom: 2px solid transparent;
     border-radius: 15px;
     font-size: 1em;
     cursor: pointer;
-    transition: all 0.5s ease;
+    transition: all 0.3s ease;
     margin-left: 5px;
 }
 
@@ -84,11 +84,12 @@
     border-radius: 15px;
     font-size: 1em;
     cursor: pointer;
-    transition: all 0.5s ease;
+    transition: all 0.3s ease;
     margin-right: 5px;
 }
 
 .upload-button:hover, .remove-button:hover {
+    padding: 10px 40px;
     border-bottom: 2px solid white;
 }
 
