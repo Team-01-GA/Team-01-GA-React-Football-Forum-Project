@@ -103,7 +103,6 @@
     display: flex;
     justify-content: start;
     gap: 30px;
-    width: 100%;
 }
 
 .create-post-content {

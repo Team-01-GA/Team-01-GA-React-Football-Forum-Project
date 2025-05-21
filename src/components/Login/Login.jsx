@@ -31,6 +31,10 @@ export default function Login({ setError, active }) {
                 navigate('/');
             })
             .catch(e => {
+                if (e.message.includes('wrong-password')) {
+                    setError('Invalid credentials.');
+                    return;
+                }
                 setError(e.message);
             });
     };
