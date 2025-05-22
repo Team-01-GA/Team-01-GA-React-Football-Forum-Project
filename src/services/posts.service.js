@@ -17,52 +17,61 @@ import {
 } from 'firebase/storage';
 
 export const getAllPosts = async (search = '') => {
-    const snapshot = await get(ref(db, 'posts'));
+    try {
+        const snapshot = await get(ref(db, 'posts'));
 
-    if (!snapshot.exists()) {
-        return [];
+        if (!snapshot.exists()) {
+            return [];
+        }
+
+        // Normalize to array
+        const posts = Object.entries(snapshot.val()).map(([id, data]) => ({
+            ...data,
+            id,
+            likedBy: Object.keys(data.likedBy || {}),
+        }));
+
+        if (search) {
+            return posts.filter((post) =>
+                post.title.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        return posts;
+    } catch (error) {
+        console.error('Error in getAllPosts:', error);
+        throw error;
     }
 
-    // const posts = Object.values(snapshot.val());
-
-    // Normalize to array
-    const posts = Object.entries(snapshot.val()).map(([id, data]) => ({
-        ...data,
-        id,
-        likedBy: Object.keys(data.likedBy || {}),
-    }));
-
-    if (search) {
-        return posts.filter((post) =>
-            post.title.toLowerCase().includes(search.toLowerCase())
-        );
-    }
-
-    return posts;
 };
 
 export const addPost = async (author, title, content, category, tags) => {
-    const post = {
-        author,
-        title,
-        content,
-        category,
-        tags,
-        createdOn: new Date().toString(),
-        likes: 0,
-        comments: {},
-    };
+    try {
+        const post = {
+            author,
+            title,
+            content,
+            category,
+            tags,
+            createdOn: new Date().toString(),
+            likes: 0,
+            comments: {},
+        };
 
-    const result = await push(ref(db, 'posts'), post);
-    const id = result.key;
+        const result = await push(ref(db, 'posts'), post);
+        const id = result.key;
 
-    // await update(ref(db, `posts/${id}`), { id })
-    await update(ref(db), {
-        [`posts/${id}/id`]: id,
-        [`users/${author}/posts/${id}`]: true,
-    });
+        await update(ref(db), {
+            [`posts/${id}/id`]: id,
+            [`users/${author}/posts/${id}`]: true,
+        });
 
-    return id;
+        return id;
+    } catch (error) {
+        console.error('Error in addPost:', error);
+        throw error;
+    }
+
 };
 
 export const likePost = async (handle, postId) => {
@@ -103,16 +112,22 @@ export const unlikePost = async (handle, postId) => {
 };
 
 export const getPostById = async (id) => {
-    const snapshot = await get(ref(db, `posts/${id}`));
+    try {
+        const snapshot = await get(ref(db, `posts/${id}`));
 
-    if (!snapshot.exists()) {
-        throw new Error('Post not found');
+        if (!snapshot.exists()) {
+            throw new Error('Post not found');
+        }
+
+        return {
+            ...snapshot.val(),
+            likedBy: Object.keys(snapshot.val().likedBy || {}),
+        };
+    } catch (error) {
+        console.error('Error in getPostById:', error);
+        throw error;
     }
 
-    return {
-        ...snapshot.val(),
-        likedBy: Object.keys(snapshot.val().likedBy || {}),
-    };
 };
 
 export const addComment = async (postId, author, content) => {
@@ -229,79 +244,107 @@ export const editComment = async (
     editor,
     isAdmin
 ) => {
-    const updates = {
-        [`posts/${postId}/comments/${commentId}/content`]: newContent,
-        [`posts/${postId}/comments/${commentId}/editedBy`]: {
-            handle: editor,
-            isAdmin: isAdmin,
-        },
-    };
+    try {
+        const updates = {
+            [`posts/${postId}/comments/${commentId}/content`]: newContent,
+            [`posts/${postId}/comments/${commentId}/editedBy`]: {
+                handle: editor,
+                isAdmin: isAdmin,
+            },
+        };
 
-    return update(ref(db), updates);
+        return update(ref(db), updates);
+    } catch (error) {
+        console.error('Error in editComment:', error);
+        throw error;
+    }
 };
 
 export const getAllComments = async (handle = null) => {
-    const result = await getAllPosts();
+    try {
+        const result = await getAllPosts();
 
-    const comments = result.flatMap((post) => {
-        if (!post.comments) return [];
+        const comments = result.flatMap((post) => {
+            if (!post.comments) return [];
 
-        return Object.entries(post.comments)
-            .filter(([commentId, comment]) =>
-                handle ? comment.author === handle : true
-            )
-            .map(([commentId, comment]) => ({
-                ...comment,
-                commentId,
-                postId: post.id,
-                postTitle: post.title,
-            }));
-    });
+            return Object.entries(post.comments)
+                .filter(([commentId, comment]) =>
+                    handle ? comment.author === handle : true
+                )
+                .map(([commentId, comment]) => ({
+                    ...comment,
+                    commentId,
+                    postId: post.id,
+                    postTitle: post.title,
+                }));
+        });
 
-    return comments.length ? comments : [];
+        return comments.length ? comments : [];
+    } catch (error) {
+        console.error('Error in getAllComments:', error);
+        throw error;
+    }
 }
 
 export const likeComment = async (postId, commentId, handle) => {
-    const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
-    const snapshot = await get(commentRef);
-    const currentLikes = snapshot.val().likes || 0;
+    try {
+        const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
+        const snapshot = await get(commentRef);
+        const currentLikes = snapshot.val().likes || 0;
 
-    await update(ref(db), {
-        [`posts/${postId}/comments/${commentId}/likes`]: currentLikes + 1,
-        [`posts/${postId}/comments/${commentId}/likedBy/${handle}`]: true,
-    });
+        await update(ref(db), {
+            [`posts/${postId}/comments/${commentId}/likes`]: currentLikes + 1,
+            [`posts/${postId}/comments/${commentId}/likedBy/${handle}`]: true,
+        });
+    } catch (error) {
+        console.error('Error in likeComment:', error);
+        throw error;
+    }
 };
 
 export const unlikeComment = async (postId, commentId, handle) => {
-    const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
-    const snapshot = await get(commentRef);
-    const currentLikes = snapshot.val().likes || 1;
-    const safeLikes = Math.max(currentLikes - 1, 0);
+    try {
+        const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
+        const snapshot = await get(commentRef);
+        const currentLikes = snapshot.val().likes || 1;
+        const safeLikes = Math.max(currentLikes - 1, 0);
 
-    await update(ref(db), {
-        [`posts/${postId}/comments/${commentId}/likes`]: safeLikes,
-        [`posts/${postId}/comments/${commentId}/likedBy/${handle}`]: null,
-    });
+        await update(ref(db), {
+            [`posts/${postId}/comments/${commentId}/likes`]: safeLikes,
+            [`posts/${postId}/comments/${commentId}/likedBy/${handle}`]: null,
+        });
+    } catch (error) {
+        console.error('Error in unlikeComment:', error);
+        throw error;
+    }
 };
 
 export const uploadPostImage = async (postId, file) => {
+    try {
+        const imgLocRef = storageRef(storage, `posts/${postId}/post.jpg`);
+        await uploadBytes(imgLocRef, file);
 
-    const imgLocRef = storageRef(storage, `posts/${postId}/post.jpg`);
-    await uploadBytes(imgLocRef, file);
+        const url = await getDownloadURL(imgLocRef);
 
-    const url = await getDownloadURL(imgLocRef);
+        await set(ref(db, `posts/${postId}/postImg`), url);
 
-    await set(ref(db, `posts/${postId}/postImg`), url);
-
-    return url;
+        return url;
+    } catch (error) {
+        console.error('Error in uploadPostImage:', error);
+        throw error;
+    }
 };
 
 export const getPostImageUrl = async (postId) => {
-
-    const snapshot = await get(ref(db, `posts/${postId}/postImg`));
-    if (snapshot.exists()) {
-        return snapshot.val();
-    } else {
-        return null;
+    try {
+        const snapshot = await get(ref(db, `posts/${postId}/postImg`));
+        if (snapshot.exists()) {
+            return snapshot.val();
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Error in getPostImageUrl:', error);
+        throw error;
     }
 };
