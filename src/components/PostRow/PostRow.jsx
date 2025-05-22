@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import './PostRow.css';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getUserByHandle } from '../../services/user.service';
+import AppContext from '../../providers/AppContext';
 
 function PostRow({ post }) {
     const [authorId, setAuthorId] = useState(null);
     const [prefersName, setPrefersName] = useState(false);
     const [authorNames, setAuthorNames] = useState('');
+
+    const { userData } = useContext(AppContext);
 
     const navigate = useNavigate();
 
@@ -39,20 +42,37 @@ function PostRow({ post }) {
 
     const handleAuthorLink = (e) => {
         e.stopPropagation();
+
+        if (!userData) {
+            alert('Please sign in or register.');
+            return;
+        }
+
         navigate(`/account/${authorId}`);
     };
+
+    const handlePostLink = (e, postId) => {
+        e.stopPropagation();
+
+        if (!userData) {
+            alert('Please sign in or register.');
+            return;
+        }
+
+        navigate(`/posts/${postId}`);
+    }
 
     return (
         <div
             className={`post-row`}
-            onClick={() => navigate(`/posts/${post.id}`)}
+            onClick={(e) => handlePostLink(e, post.id)}
         >
             <div className={post?.postImg ? 'post-row-column' : ''}>
                 <p
                     className="post-row-author"
                     onClick={(e) => handleAuthorLink(e)}
                 >
-                    <strong>By:</strong> {prefersName ? authorNames : post.author}
+                    By: <strong>{prefersName ? authorNames : post.author}</strong>
                 </p>
 
                 <p className="go-to-author">Go to author</p>
@@ -60,7 +80,7 @@ function PostRow({ post }) {
                 <p className="post-row-title">{post.title}</p>
 
                 <p className="post-row-content">
-                    {post.content.length > 200
+                    {post?.content?.length > 200
                         ? `${post.content.slice(0, 200)} ...`
                         : post.content}
                 </p>

@@ -15,6 +15,40 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../../components/Loader/Loader';
 import AccountPicture from '../../components/AccountPicture/AccountPicture';
 import CommentRow from '../../components/CommentRow/CommentRow';
+import Select from 'react-select';
+
+const postSortOptions = [
+    { value: 'date-desc', label: 'Newest first' },
+    { value: 'date-asc', label: 'Oldest first' },
+    { value: 'likes-desc', label: 'Most likes' },
+    { value: 'likes-asc', label: 'Least likes' },
+    { value: 'comments-desc', label: 'Most comments' },
+    { value: 'comments-asc', label: 'Least comments' },
+];
+const postSorting = {
+    'date-desc': (a, b) => new Date(b.createdOn) - new Date(a.createdOn),
+    'date-asc': (a, b) => new Date(a.createdOn) - new Date(b.createdOn),
+    'likes-desc': (a, b) => (b.likes || 0) - (a.likes || 0),
+    'likes-asc': (a, b) => (a.likes || 0) - (b.likes || 0),
+    'comments-desc': (a, b) => (b.commentCount || 0) - (a.commentCount || 0),
+    'comments-asc': (a, b) => (a.commentCount || 0) - (b.commentCount || 0),
+};
+
+const commentSortOptions = [
+    { value: 'date-desc', label: 'Newest first' },
+    { value: 'date-asc', label: 'Oldest first' },
+    { value: 'likes-desc', label: 'Most likes' },
+    { value: 'likes-asc', label: 'Least likes' },
+];
+const commentSorting = {
+    'date-desc': (a, b) => new Date(b.createdOn) - new Date(a.createdOn),
+    'date-asc': (a, b) => new Date(a.createdOn) - new Date(b.createdOn),
+    'likes-desc': (a, b) => (b.likes || 0) - (a.likes || 0),
+    'likes-asc': (a, b) => (a.likes || 0) - (b.likes || 0),
+};
+
+const likeSortOptions = postSortOptions;
+const likeSorting = postSorting;
 
 function AccountPage() {
     const user = useContext(AppContext);
@@ -47,6 +81,11 @@ function AccountPage() {
     const { userId } = useParams();
     const currentUserId = userId ? userId : user.user.uid;
     const loggedInUser = userId === user.user.uid;
+
+    const [postSortBy, setPostSortBy] = useState(postSortOptions[0]);
+    const [commentSortBy, setCommentSortBy] = useState(commentSortOptions[0]);
+    const [likeSortBy, setLikeSortBy] = useState(likeSortOptions[0]);
+
 
     const navigate = useNavigate();
 
@@ -247,16 +286,19 @@ function AccountPage() {
                             filtered = result.filter(
                                 (post) => post.author === userToView.handle
                             );
+                            filtered = filtered.sort(postSorting[postSortBy.value]);
                             break;
 
                         case 2:
                             filtered = await getAllComments(userToView.handle);
+                            filtered = filtered.sort(commentSorting[commentSortBy.value]);
                             break;
 
                         case 3:
                             filtered = result.filter((post) =>
                                 post.likedBy.includes(userToView.handle)
                             );
+                            filtered = filtered.sort(likeSorting[likeSortBy.value]);
                             break;
                     }
 
@@ -274,11 +316,49 @@ function AccountPage() {
 
             loadContent();
         }
-    }, [contentSwitcher, userToView, currentUserId]);
+    }, [contentSwitcher, userToView, currentUserId, postSortBy, commentSortBy, likeSortBy]);
 
     if (userNotFound) return <h1>User not found.</h1>;
 
     if (!content || !user || !userToView) return <Loader />;
+
+    const sortStyles = {
+        control: (base, state) => ({
+            ...base,
+            backgroundColor: 'rgb(194, 186, 186)',
+            borderRadius: '15px',
+            border: 'none',
+            marginLeft: '20px',
+            transition: 'all 0.3s ease',
+            outline: state.isFocused
+                ? '1px solid black'
+                : '1px solid transparent',
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: 'black',
+        }),
+        dropdownIndicator: (base) => ({
+            ...base,
+            color: 'black',
+        }),
+        menu: (base) => ({
+            ...base,
+            backgroundColor: 'rgb(225, 218, 218)',
+            color: 'black',
+            marginLeft: '20px',
+        }),
+        option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isFocused
+                ? 'rgb(194, 186, 186)'
+                : state.isSelected
+                ? 'rgb(194, 186, 186)'
+                : 'transparent',
+            color: 'black',
+            padding: 10,
+        }),
+    };
 
     return (
         <div id="acc-wrapper">
@@ -326,6 +406,7 @@ function AccountPage() {
                                 >
                                     Account Settings
                                 </button>
+                                {loggedInUser && user.userData.isAdmin && <button id='acc-admin-panel-button' onClick={() => navigate('/admin')}>Admin Panel</button>}
                             </>
                         ) : (
                             <input
@@ -340,7 +421,7 @@ function AccountPage() {
                         <div className="greeting">
                             {editMode 
                                 ? <div id='acc-preferences-wrapper'>
-                                    <p>Prefer:</p>
+                                    <p>Name to display:</p>
                                     <div className={`acc-preferences ${userPrefersName ? 'active' : ''}`} onClick={() => setUserPrefersName(true)}>
                                         <p>{userToView.firstName} {userToView.lastName}</p>
                                         <span>First, last name</span>
@@ -432,6 +513,36 @@ function AccountPage() {
                         Likes
                     </button>
                 </div>
+                {contentSwitcher === 1 && (
+                    <Select
+                        options={postSortOptions}
+                        value={postSortBy}
+                        styles={sortStyles}
+                        onChange={(selected) => setPostSortBy(selected)}
+                        isSearchable={false}
+                        aria-label="Sort posts"
+                    />
+                )}
+                {contentSwitcher === 2 && (
+                    <Select
+                        options={commentSortOptions}
+                        value={commentSortBy}
+                        styles={sortStyles}
+                        onChange={(selected) => setCommentSortBy(selected)}
+                        isSearchable={false}
+                        aria-label="Sort comments"
+                    />
+                )}
+                {contentSwitcher === 3 && (
+                    <Select
+                        options={likeSortOptions}
+                        value={likeSortBy}
+                        styles={sortStyles}
+                        onChange={(selected) => setLikeSortBy(selected)}
+                        isSearchable={false}
+                        aria-label="Sort liked posts"
+                    />
+                )}
             </div>
             <div id="acc-content">
                 <div

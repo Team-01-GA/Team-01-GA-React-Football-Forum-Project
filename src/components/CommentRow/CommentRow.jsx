@@ -38,12 +38,18 @@ function CommentRow({ comment }) {
             }
         }, [comment]);
 
+        const handleAuthorLink = (e) => {
+            e.stopPropagation();
+            navigate(`/account/${authorId}`);
+        };
+
     return (
         <div className='comment-row'>
             <p className='comment-link-tooltip' onClick={() => navigate(`/posts/${comment.postId}`)}>Go to post</p>
-            <p className='comment-author' onClick={() => navigate(`/account/${authorId}`)}>by <strong>{prefersName ? authorFullName : comment.author}</strong></p>
+            <p className='comment-author' onClick={(e) => handleAuthorLink(e)}>by <strong>{prefersName ? authorFullName : comment.author}</strong></p>
             <p className='comment-post-title'>{comment.postTitle}</p>
             <p className='comment-content'>{comment.content}</p>
+            <p className='comment-row-detail'>Likes: {comment?.likes || 0}</p>
             <p className='comment-date'>{new Date(comment.createdOn).toLocaleDateString()}</p>
         </div>
     );

@@ -47,14 +47,14 @@ function HomePage() {
                 </p>
             </div>
             <div id='forum-content'>
-                <p className='forum-content-title'>10 most recent posts</p>
-                <p className='forum-content-title'>10 most commented posts</p>
                 <div className='forum-content-container glassmorphic-bg'>
+                    <p className='forum-content-title'>10 most recent posts</p>
                     {posts.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn)).map((post, index) => {
                         return <PostRow key={index*2534} post={post} preview={true} />
                     }).slice(0, 10)}
                 </div>
                 <div className='forum-content-container glassmorphic-bg'>
+                    <p className='forum-content-title'>10 most commented posts</p>
                     {posts.sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0)).map((post, index) => {
                         return <PostRow key={index*1234} post={post} preview={true} />
                     }).slice(0, 10)}

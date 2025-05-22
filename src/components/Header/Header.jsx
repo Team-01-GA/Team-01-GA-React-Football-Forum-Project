@@ -21,7 +21,7 @@ function Header() {
     }
 
     return (
-        <div id="header">
+        <div id="header" className='glassmorphic-bg'>
             <NavLink className='home' to='/'><h1>React Fantasy Football Forum</h1></NavLink>
             {!user.user ? (
                 <NavLink to='/auth-gate'>Login / Register</NavLink>

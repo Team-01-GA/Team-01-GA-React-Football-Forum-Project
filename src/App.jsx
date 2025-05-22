@@ -16,6 +16,7 @@ import PostDetails from './views/PostDetails/PostDetails';
 import AccountPage from './views/AccountPage/AccountPage';
 import Loader from './components/Loader/Loader';
 import SearchResults from './views/SearchResults/SearchResults';
+import AdminPanel from './views/AdminPanel/AdminPanel';
 
 
 function App() {
@@ -56,6 +57,12 @@ function App() {
         return <Loader />;
     }
 
+    if (error) {
+        return <div style={{position: 'absolute', width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <h1>Failed to load user data. Please refresh the page.</h1>
+        </div>
+    }
+
     return (
         <>
             <AppContext.Provider value={{ ...appState, setContext: setAppState }}>
@@ -79,6 +86,7 @@ function App() {
                                 <Route path='/account/:userId' element={<AccountPage />} />
                                 <Route path='/search/' element={<SearchResults />}/>
                                 <Route path='/search/:query' element={<SearchResults />}/>
+                                {appState.userData?.isAdmin && <Route path='/admin' element={<AdminPanel />}/>}
                                 <Route path='*' element={<HomePage />} />
                             </>
                         }

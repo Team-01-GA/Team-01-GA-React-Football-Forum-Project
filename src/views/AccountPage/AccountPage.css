@@ -29,6 +29,11 @@
     padding: 10px 15px;
     border: none;
     align-self: center;
+    transition: all 0.3s ease;
+}
+
+#main-acc-info button:hover {
+    padding: 10px 30px;
 }
 
 #main-acc-info #block-btn {
@@ -213,7 +218,7 @@
     font-size: 2em;
 }
 
-#acc-edit-button {
+#acc-edit-button, #acc-admin-panel-button {
     font-size: 1.2em;
     cursor: pointer;
 }
@@ -295,7 +300,7 @@
     width: 100%;
     border-radius: 15px;
     margin: 0 auto;
-    margin-top: 40px;
+    margin-top: 20px;
     padding: 10px 0;
     font-size: 1.2em;
     cursor: pointer;

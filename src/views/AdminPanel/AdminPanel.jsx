@@ -1,5 +1,4 @@
-import { useParams } from 'react-router-dom';
-import './SearchResults.css';
+import '../SearchResults/SearchResults.css';
 import { useEffect, useState } from 'react';
 import Loader from '../../components/Loader/Loader';
 import { getAllComments, getAllPosts } from '../../services/posts.service';
@@ -15,14 +14,14 @@ const postFilterOptions = [
 ];
 const postFilters = {
     none: () => true,
-    hasImg: (post) => !!post?.postImg,
-    noImg: (post) => !post?.postImg,
     noEngagement: (post) => !post?.commentCount && !post?.likes,
 };
 
 const userFilterOptions = [
     { value: 'none', label: 'None' },
     { value: 'noActivity', label: 'No posts, likes, or comments' },
+    { value: 'isBlocked', label: 'Blocked users' },
+    { value: 'notBlocked', label: 'Not blocked users' },
 ];
 const userFilters = {
     none: () => true,
@@ -30,21 +29,18 @@ const userFilters = {
         (!user.posts || Object.keys(user.posts).length === 0) &&
         (!user.likedPosts || Object.keys(user.likedPosts).length === 0) &&
         (!user.comments || Object.keys(user.comments).length === 0),
+    isBlocked: (user) => !!user.isBlocked,
+    notBlocked: (user) => !user.isBlocked,
 };
 
 const commentFilterOptions = [
     { value: 'none', label: 'None' },
-    { value: 'noEngagement', label: 'No engagement yet' },
 ];
 const commentFilters = {
     none: () => true,
-    noEngagement: (comment) => !comment?.likes,
 };
 
-function SearchResults() {
-    const { query: rawQuery } = useParams();
-
-    const [query, setQuery] = useState(null);
+function AdminPanel() {
     const [contentSwitcherHighlight, setContentSwitcherHighlight] = useState(1);
     const [contentSwitcher, setContentSwitcher] = useState(1);
     const [loadingAnim, setLoadingAnim] = useState(false);
@@ -65,6 +61,12 @@ function SearchResults() {
 
     const [filterBy, setFilterBy] = useState(postFilterOptions[0]);
 
+    const [forumCount, setForumCount] = useState({
+        posts: 0,
+        users: 0,
+        comments: 0,
+    })
+
     const getFilterOptions = () => {
         if (contentSwitcher === 1) return postFilterOptions;
         if (contentSwitcher === 2) return userFilterOptions;
@@ -80,29 +82,7 @@ function SearchResults() {
 
     useEffect(() => {
         setFilterBy(getFilterOptions()[0]);
-    }, [contentSwitcher])
-
-    useEffect(() => {
-        let normalisedQuery = rawQuery;
-        if (normalisedQuery === undefined) {
-            normalisedQuery = ' ';
-        }
-        setQuery(decodeURIComponent(normalisedQuery));
-    }, [rawQuery]);
-
-    useEffect(() => {
-        if (query) {
-            document.title = `Search Results For "${query}" - React Fantasy Football Forum`;
-        }
-    }, [query]);
-
-    const handleContentSwitch = async (content) => {
-        setContentSwitcherHighlight(content);
-        toggleContentDelay(true);
-        setLoadingAnim(true);
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        setContentSwitcher(content);
-    };
+    }, [contentSwitcher]);
 
     const sortConfig = {
         1: {
@@ -183,99 +163,77 @@ function SearchResults() {
 
     const handleContentSort = (value) => {
         const config = sortConfig[contentSwitcher];
-
         setSortBy(config.options.find((option) => option.value === value));
         setContent((prev) => [...prev].sort(config.sorting[value]));
     };
 
-    const getSortOptions = () => sortConfig[contentSwitcher].options || 0;
+    const getSortOptions = () => sortConfig[contentSwitcher].options || [];
+
+    const handleContentSwitch = async (content) => {
+        setContentSwitcherHighlight(content);
+        toggleContentDelay(true);
+        setLoadingAnim(true);
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        setContentSwitcher(content);
+    };
 
     useEffect(() => {
-        if (query) {
-            const loadContent = async () => {
-                try {
-                    let content = [];
+        setLoadingAnim(true);
+        const loadContent = async () => {
+            try {
+                let loadedContent = [];
+                const posts = await getAllPosts();
+                const users = await getAllUsers();
+                const comments = await getAllComments();
 
-                    let defaultSort = defaultSorting[contentSwitcher];
-                    setSortOptions(getSortOptions());
+                setForumCount({
+                    posts: posts.length,
+                    users: users.length,
+                    comments: comments.length,
+                })
 
-                    const normalisedQuery = query.toLowerCase();
-                    const posts = await getAllPosts();
-                    const users = await getAllUsers();
-                    const comments = await getAllComments();
-
-                    if (contentSwitcher === 1) {
-                        content = posts.filter((post) => {
-                            const titleMatches = post.title
-                                .toLowerCase()
-                                .includes(normalisedQuery);
-
-                            const bodyMatches = post.content
-                                .toLowerCase()
-                                .includes(normalisedQuery);
-
-                            const tagMatches =
-                                Array.isArray(post.tags) &&
-                                post.tags.some((tag) =>
-                                    tag.toLowerCase().includes(normalisedQuery)
-                                );
-
-                            return titleMatches || bodyMatches || tagMatches;
-                        });
-
-                        setSortBy({
-                            value: 'date-desc',
-                            label: 'Newest first',
-                        });
-                    }
-
-                    if (contentSwitcher === 2) {
-                        content = users
-                            .filter((userArray) => {
-                                return userArray[0].includes(normalisedQuery);
-                            })
-                            .map(([handle, userData]) => ({
+                if (contentSwitcher === 1) {
+                    loadedContent = posts;
+                }
+                if (contentSwitcher === 2) {
+                    loadedContent = users.map(([handle, userData]) => ({
                                 handle,
                                 ...userData,
-                            }));
-
-                        setSortBy({ value: 'posts-desc', label: 'Most posts' });
-                    }
-
-                    if (contentSwitcher === 3) {
-                        content = comments.filter((comment) => {
-                            return comment.content
-                                .toLowerCase()
-                                .includes(normalisedQuery);
-                        });
-
-                        setSortBy({
-                            value: 'date-desc',
-                            label: 'Newest first',
-                        });
-                    }
-
-                    setContent(
-                        content.sort(
-                            sortConfig[contentSwitcher].sorting[defaultSort]
-                        )
-                    );
-
-                    await new Promise((resolve) => setTimeout(resolve, 300));
-                    toggleContentDelay(false);
-
-                    setLoadingAnim(false);
-                } catch (e) {
-                    console.error(
-                        `Failed getting search results for ${query}:`,
-                        e
-                    );
+                            }))
                 }
-            };
+                if (contentSwitcher === 3) {
+                    loadedContent = comments;
+                }
+                setContent(
+                    loadedContent.sort(
+                        sortConfig[contentSwitcher].sorting[defaultSorting[contentSwitcher]]
+                    )
+                );
+                setSortBy(
+                    sortConfig[contentSwitcher].options.find(
+                        (opt) => opt.value === defaultSorting[contentSwitcher]
+                    )
+                );
+                setLoadingAnim(false);
+                toggleContentDelay(false);
+            } catch (e) {
+                console.error('Failed to load admin panel: ', e);
+                setContent([]);
+                setLoadingAnim(false);
+                toggleContentDelay(false);
+            }
+        };
 
-            loadContent();
-        }
-    }, [query, contentSwitcher]);
+        loadContent();
+    }, [contentSwitcher]);
+
+    useEffect(() => {
+        setSortOptions(getSortOptions());
+    }, [contentSwitcher]);
+
+    useEffect(() => {
+        setFilterBy(getFilterOptions()[0]);
+    }, [contentSwitcher]);
 
     const filteredContent = content.filter(getFilterFn());
 
@@ -336,11 +294,20 @@ function SearchResults() {
         }),
     };
 
-    if (!query) return <Loader />;
-
     return (
         <div id="search-results-wrapper">
-            <h1>Search results for "{query}"</h1>
+            <h1>Admin Panel</h1>
+            <div id='forum-details'>
+                <p className="forum-detail">
+                    Posts: {forumCount.posts}
+                </p>
+                <p className="forum-detail">
+                    Users: {forumCount.users}
+                </p>
+                <p className="forum-detail">
+                    Comments: {forumCount.comments}
+                </p>
+            </div>
             <div id="search-results-options">
                 <div className="button-container">
                     <button
@@ -400,7 +367,7 @@ function SearchResults() {
                     ${contentDelay ? 'content-loading' : ''}
                 `}
                 >
-                    {content.length ? (
+                    {filteredContent.length ? (
                         renderRows(filteredContent)
                     ) : (
                         <p className="no-acc-content">
@@ -415,4 +382,4 @@ function SearchResults() {
     );
 }
 
-export default SearchResults;
+export default AdminPanel;

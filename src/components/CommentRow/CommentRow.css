@@ -45,6 +45,18 @@
     margin-bottom: 10px;
 }
 
+.comment-row .comment-content {
+    white-space: pre-wrap;
+}
+
+.comment-row-detail {
+    background-color: rgb(225, 218, 218);
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
+    width: fit-content;
+}
+
 .comment-row .comment-date {
     text-align: right;
 }

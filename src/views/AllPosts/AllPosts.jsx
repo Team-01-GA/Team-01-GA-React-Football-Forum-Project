@@ -179,7 +179,6 @@ export default function AllPosts({ category = null }) {
                                 <PostCard
                                     key={post.id}
                                     post={post}
-                                    preview={true}
                                 />
                             )
                         )
