@@ -261,17 +261,18 @@ export const getAllComments = async (handle = null) => {
     return comments.length ? comments : [];
 }
 
-export const likeComment = async (postId, commentId) => {
+export const likeComment = async (postId, commentId, handle) => {
     const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
     const snapshot = await get(commentRef);
     const currentLikes = snapshot.val().likes || 0;
 
     await update(ref(db), {
         [`posts/${postId}/comments/${commentId}/likes`]: currentLikes + 1,
+        [`posts/${postId}/comments/${commentId}/likedBy/${handle}`]: true,
     });
 };
 
-export const unlikeComment = async (postId, commentId) => {
+export const unlikeComment = async (postId, commentId, handle) => {
     const commentRef = ref(db, `posts/${postId}/comments/${commentId}`);
     const snapshot = await get(commentRef);
     const currentLikes = snapshot.val().likes || 1;
@@ -279,6 +280,7 @@ export const unlikeComment = async (postId, commentId) => {
 
     await update(ref(db), {
         [`posts/${postId}/comments/${commentId}/likes`]: safeLikes,
+        [`posts/${postId}/comments/${commentId}/likedBy/${handle}`]: null,
     });
 };
 

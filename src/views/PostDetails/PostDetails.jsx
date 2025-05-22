@@ -73,6 +73,17 @@ export default function PostDetails() {
                     hasImg: !!data?.postImg,
                     tags: Object.values(data.tags || {}).join(', '),
                 });
+
+                const initialLikedComments = {};
+                if (data.comments) {
+                    for (const [id, comment] of Object.entries(data.comments)) {
+                        if (comment.likedBy && comment.likedBy[userData.handle]) {
+                            initialLikedComments[id] = true;
+                        }
+                    }
+                }
+                setLikedComments(initialLikedComments);
+
             } catch (err) {
                 console.error('Failed to load post:', err);
             } finally {
@@ -193,9 +204,9 @@ export default function PostDetails() {
 
         try {
             if (isLiked) {
-                await unlikeComment(post.id, commentId);
+                await unlikeComment(post.id, commentId, userData.handle);
             } else {
-                await likeComment(post.id, commentId);
+                await likeComment(post.id, commentId, userData.handle);
             }
 
             const updated = await getPostById(postId);
@@ -214,7 +225,7 @@ export default function PostDetails() {
     const handleCommentAuthorLink = async (handle, commentId) => {
         try {
             const snapshot = await getUserByHandle(handle);
-    
+
             if (!snapshot.exists()) {
                 throw new Error(`Author not found for commentId ${commentId}`);
             }
@@ -222,7 +233,7 @@ export default function PostDetails() {
             navigate(`/account/${snapshot.val().uid}`);
         }
         catch (e) {
-            console.error('Failed getting link to author: ',  e);
+            console.error('Failed getting link to author: ', e);
         }
     }
 
@@ -263,11 +274,11 @@ export default function PostDetails() {
                             }))
                         }
                     />
-                    {editFields.hasImg && 
+                    {editFields.hasImg &&
                         <>
                             <p>Image:</p>
-                            <img src={post?.postImg} style={{ width: '100%' }}/>
-                            <button onClick={() => setEditFields((prev) => ({...prev, hasImg: false}))}>Remove image</button>
+                            <img src={post?.postImg} style={{ width: '100%' }} />
+                            <button onClick={() => setEditFields((prev) => ({ ...prev, hasImg: false }))}>Remove image</button>
                         </>
                     }
 
