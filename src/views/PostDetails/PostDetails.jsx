@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { deleteComment, deletePost, getPostById, likePost, unlikePost } from '../../services/posts.service';
+import {
+    deleteComment,
+    deletePost,
+    getPostById,
+    likePost,
+    unlikePost,
+} from '../../services/posts.service';
 import PostCard from '../../components/PostCard/PostCard';
 import { useContext } from 'react';
 import AppContext from '../../providers/AppContext';
@@ -10,9 +16,50 @@ import Loader from '../../components/Loader/Loader';
 import { editPost, editComment } from '../../services/posts.service';
 import { getUserByHandle } from '../../services/user.service';
 import { likeComment, unlikeComment } from '../../services/posts.service';
+import Select from 'react-select';
+
+const commentSortOptions = [
+    { value: 'newest', label: 'Sort by Newest' },
+    { value: 'oldest', label: 'Sort by Oldest' },
+    { value: 'mostLiked', label: 'Sort by Most Likes' },
+    { value: 'leastLiked', label: 'Sort by Least Likes' },
+];
+
+const sortStyles = {
+    control: (base) => ({
+        ...base,
+        backgroundColor: 'rgb(236, 236, 236)',
+        borderRadius: '15px',
+        border: 'none',
+        fontSize: '1em',
+        minWidth: 200,
+    }),
+    singleValue: (base) => ({
+        ...base,
+        color: 'black',
+    }),
+    dropdownIndicator: (base) => ({
+        ...base,
+        color: 'black',
+    }),
+    menu: (base) => ({
+        ...base,
+        backgroundColor: 'rgb(225, 218, 218)',
+        color: 'black',
+    }),
+    option: (base, state) => ({
+        ...base,
+        backgroundColor: state.isFocused
+            ? 'rgb(194, 186, 186)'
+            : state.isSelected
+            ? 'rgb(194, 186, 186)'
+            : 'transparent',
+        color: 'black',
+        padding: 10,
+    }),
+};
 
 export default function PostDetails() {
-
     const { userData } = useContext(AppContext);
     const { postId } = useParams();
 
@@ -31,6 +78,7 @@ export default function PostDetails() {
     });
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editCommentText, setEditCommentText] = useState('');
+    const [commentToDelete, setCommentToDelete] = useState(null);
     const [authorId, setAuthorId] = useState(null);
     const [prefersName, setPrefersName] = useState(false);
     const [authorNames, setAuthorNames] = useState('');
@@ -48,10 +96,11 @@ export default function PostDetails() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        document.title = `${post
-            ? `${post.title} - React Fantasy Football Forum`
-            : 'Post not found - React Fantasy Football Forum'
-            }`;
+        document.title = `${
+            post
+                ? `${post.title} - React Fantasy Football Forum`
+                : 'Post not found - React Fantasy Football Forum'
+        }`;
     }, [post]);
 
     useEffect(() => {
@@ -70,15 +119,17 @@ export default function PostDetails() {
                 });
 
                 const initialLikedComments = {};
-                if (data.comments) {
+                if (data.comments && userData?.handle) {
                     for (const [id, comment] of Object.entries(data.comments)) {
-                        if (comment.likedBy && comment.likedBy[userData.handle]) {
+                        if (
+                            comment.likedBy &&
+                            comment.likedBy[userData.handle]
+                        ) {
                             initialLikedComments[id] = true;
                         }
                     }
                 }
                 setLikedComments(initialLikedComments);
-
             } catch (err) {
                 console.error('Failed to load post:', err);
             } finally {
@@ -88,7 +139,6 @@ export default function PostDetails() {
 
         fetchPost();
     }, [postId, userData]);
-
 
     useEffect(() => {
         if (post) {
@@ -104,12 +154,11 @@ export default function PostDetails() {
 
                     setAuthorId(user.uid);
                     setPrefersName(user?.prefersFullName);
-                    setAuthorImage(user?.profileImg)
+                    setAuthorImage(user?.profileImg);
 
                     if (user?.prefersFullName) {
                         setAuthorNames(`${user?.firstName} ${user?.lastName}`);
                     }
-
                 } catch (e) {
                     console.error('Error getting post author link:', e);
                 }
@@ -124,17 +173,21 @@ export default function PostDetails() {
                     const snapshot = await getUserByHandle(editedBy.handle);
 
                     if (!snapshot.exists()) {
-                        throw new Error(`Editor not found for postId ${post.id}`);
+                        throw new Error(
+                            `Editor not found for postId ${post.id}`
+                        );
                     }
 
-                    const editor = snapshot.val()
+                    const editor = snapshot.val();
 
                     if (editor?.prefersFullName) {
-                        setEditedBy(prev => ({...prev, fullName: `${editor.firstName} ${editor.lastName}`}));
+                        setEditedBy((prev) => ({
+                            ...prev,
+                            fullName: `${editor.firstName} ${editor.lastName}`,
+                        }));
                     } else {
-                        setEditedBy(prev => ({...prev, fullName: null}));
+                        setEditedBy((prev) => ({ ...prev, fullName: null }));
                     }
-
                 } catch (e) {
                     console.error('Error getting editor:', e);
                 }
@@ -231,13 +284,16 @@ export default function PostDetails() {
             const updated = await getPostById(postId);
             setPost(updated);
             setIsEditing(false);
+
+            window.location.reload();
         } catch (err) {
             console.error('Failed to update post:', err);
             alert('Could not update post.');
         }
     };
 
-    const handleSaveCommentEdit = async (commentId) => {
+    const handleSaveCommentEdit = async (e, commentId) => {
+        e.stopPropagation();
         try {
             await editComment(
                 postId,
@@ -269,7 +325,7 @@ export default function PostDetails() {
             const updated = await getPostById(postId);
             setPost(updated);
 
-            setLikedComments(prev => ({
+            setLikedComments((prev) => ({
                 ...prev,
                 [commentId]: !isLiked,
             }));
@@ -288,24 +344,23 @@ export default function PostDetails() {
             }
 
             navigate(`/account/${snapshot.val().uid}`);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed getting link to author: ', e);
         }
-    }
+    };
 
     const handleLikeClick = async () => {
         if (isLiking) {
             return;
         }
         setIsLiking(true);
-    
+
         if (userData.isBlocked) {
             alert('Sorry, you are blocked.');
             setIsLiking(false);
             return;
         }
-    
+
         try {
             if (liked) {
                 await unlikePost(userData.handle, post.id);
@@ -314,7 +369,7 @@ export default function PostDetails() {
                 await likePost(userData.handle, post.id);
                 setLikeCount((count) => count + 1);
             }
-                setLiked(!liked);
+            setLiked(!liked);
         } catch (error) {
             console.error('Failed to toggle like:', error);
         } finally {
@@ -332,159 +387,251 @@ export default function PostDetails() {
         } catch (error) {
             alert('Failed to delete post.', error);
         }
-    };        
+    };
 
     return (
         <div className="post-details">
-            {isDeleting && <div id='delete-confirmation' onClick={() => setIsDeleting(false)}>
-                <div className='glassmorphic-bg'>
-                    <h1>Are you sure you want to delete this post?</h1>
-                    <button onClick={(e) => handleDeletePost(e)}>Delete</button>
+            {isDeleting && (
+                <div
+                    id="delete-confirmation"
+                    onClick={() => setIsDeleting(false)}
+                >
+                    <div className="glassmorphic-bg">
+                        <h1>Are you sure you want to delete this post?</h1>
+                        <button onClick={(e) => handleDeletePost(e)}>
+                            Delete
+                        </button>
+                    </div>
                 </div>
-            </div>}
-            <div className={`editing-backdrop ${isEditing ? 'editing' : ''}`} onClick={() => setIsEditing(false)}></div>
-            <div id='post-details-main' className={`glassmorphic-bg ${isEditing ? 'editing' : ''}`}>
-            {!isEditing
-                ?  <>
-                    {authorImage 
-                        ? <img className='post-details-author-img' src={authorImage} alt='Author image'/> 
-                        : <div className='post-details-author-placeholder'><p>?</p></div>
-                    }
-                    <p className='post-details-author' onClick={() => navigate(`/account/${authorId}`)}>{prefersName ? authorNames : post.author}</p>
-                    <p className='post-details-date'>{new Date(post.createdOn).toLocaleDateString()}</p>
-                    <p className='post-details-title'>{post.title}</p>
-
-                    {postImg && <img src={postImg} alt='Post image'/>}
-
-                    <div className='post-details-content'>
-                        <p>{post.content}</p>
-                    </div>
-
-                    <div className='post-details-details'>
-                        {editedBy.handle && <p className='post-details-detail'>Edited by: {editedBy?.isAdmin ? 'Admin' : editedBy?.fullName ? editedBy?.fullName : editedBy?.handle}</p>}
-                        <p className='post-details-detail'>{post.category.replaceAll('-', ' ')}</p>
-                        <p className={`post-details-detail likes ${liked ? 'liked' : ''}`} onClick={handleLikeClick} disabled={isLiking}>{liked ? 'Unlike:' : 'Like:'} {likeCount}</p>
-                        <p className='post-details-detail'>Comments: {post?.commentCount || 0}</p>
-                    </div>
-
-                    <p className="tags">
-                        {Object.values(post.tags).map((tag) => (
-                            <span
-                                key={tag}
-                                className="clickable-tag"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/search/${ tag }`);
-                                }}
-                            >
-                                #{tag}
-                            </span>
-                        ))}
-                    </p>
-                    {(userData.isAdmin || userData.handle === post.author) &&
-                        <div className='post-details-actions'>
-                            <i className="fa-solid fa-ellipsis"></i>
-                            <div className='action-buttons'>
-                                <button className='post-action-button' onClick={() => setIsDeleting(true)}><i className='fa-solid fa-trash-can'></i></button>
-                                <button className='post-action-button' onClick={() => setIsEditing(true)}><i className='fa-solid fa-pen-to-square'></i></button>
+            )}
+            <div
+                className={`editing-backdrop ${
+                    isEditing ? 'editing' : ''
+                }`}
+                onClick={() => setIsEditing(false)}
+            ></div>
+            <div
+                id="post-details-main"
+                className={`glassmorphic-bg ${isEditing ? 'editing' : ''}`}
+            >
+                {!isEditing ? (
+                    <>
+                        {authorImage ? (
+                            <img
+                                className="post-details-author-img"
+                                src={authorImage}
+                                alt="Author image"
+                            />
+                        ) : (
+                            <div className="post-details-author-placeholder">
+                                <p>?</p>
                             </div>
+                        )}
+                        <p
+                            className="post-details-author"
+                            onClick={() => navigate(`/account/${authorId}`)}
+                        >
+                            {prefersName ? authorNames : post.author}
+                        </p>
+                        <p className="post-details-date">
+                            {new Date(post.createdOn).toLocaleDateString()}
+                        </p>
+                        <p className="post-details-title">{post.title}</p>
+
+                        {postImg && <img src={postImg} alt="Post image" />}
+
+                        <div className="post-details-content">
+                            <p>{post.content}</p>
                         </div>
-                    }
-                </>
-                : <>
-                    {authorImage 
-                        ? <img className='post-details-author-img' src={authorImage} alt='Author image'/> 
-                        : <div className='post-details-author-placeholder'><p>?</p></div>
-                    }
-                    <p className='post-details-author' onClick={() => navigate(`/account/${authorId}`)}>{prefersName ? authorNames : post.author}</p>
 
-                    <input value={editFields.title} onChange={(e) => setEditFields((prev) => ({
-                                ...prev,
-                                title: e.target.value,
-                            }))}/>
-
-                    {editFields.hasImg && 
-                        <div className='edit-img'>
-                            <img src={postImg}/>
-                            <button className='remove-image' onClick={() => setEditFields((prev) => ({...prev, hasImg: false}))}>Remove image</button>
+                        <div className="post-details-details">
+                            {editedBy.handle && (
+                                <p className="post-details-detail">
+                                    Edited by:{' '}
+                                    {editedBy?.fullName
+                                        ? `${editedBy?.fullName} ${editedBy.isAdmin ? '(admin)' : ''}`
+                                        : `${editedBy?.handle} ${editedBy.isAdmin ? '(admin)' : ''}`
+                                    }
+                                </p>
+                            )}
+                            <p className="post-details-detail">
+                                {post.category.replaceAll('-', ' ')}
+                            </p>
+                            <p
+                                className={`post-details-detail likes ${
+                                    liked ? 'liked' : ''
+                                }`}
+                                onClick={handleLikeClick}
+                                disabled={isLiking}
+                            >
+                                {liked ? 'Unlike:' : 'Like:'} {likeCount}
+                            </p>
+                            <p className="post-details-detail">
+                                Comments: {post?.commentCount || 0}
+                            </p>
                         </div>
-                    }
 
-                    <textarea
-                        rows="6"
-                        value={editFields.content}
-                        onChange={(e) =>
-                            setEditFields((prev) => ({
-                                ...prev,
-                                content: e.target.value,
-                            }))
-                        }
-                    />
-                    <input
-                        value={editFields.tags}
-                        onChange={(e) =>
-                            setEditFields((prev) => ({
-                                ...prev,
-                                tags: e.target.value,
-                            }))
-                        }
-                    />
+                        <p className="tags">
+                            {Object.values(post.tags).map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="clickable-tag"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/search/${tag}`);
+                                    }}
+                                >
+                                    #{tag}
+                                </span>
+                            ))}
+                        </p>
+                        {(userData.isAdmin ||
+                            userData.handle === post.author) && (
+                            <div className="post-details-actions">
+                                <i className="fa-solid fa-ellipsis"></i>
+                                <div className="action-buttons">
+                                    <button
+                                        className="post-action-button"
+                                        onClick={() => setIsDeleting(true)}
+                                    >
+                                        <i className="fa-solid fa-trash-can"></i>
+                                    </button>
+                                    <button
+                                        className="post-action-button"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <i className="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {authorImage ? (
+                            <img
+                                className="post-details-author-img"
+                                src={authorImage}
+                                alt="Author image"
+                            />
+                        ) : (
+                            <div className="post-details-author-placeholder">
+                                <p>?</p>
+                            </div>
+                        )}
+                        <p
+                            className="post-details-author"
+                            onClick={() => navigate(`/account/${authorId}`)}
+                        >
+                            {prefersName ? authorNames : post.author}
+                        </p>
 
-                    <div className='post-edit-actions'>
-                        <button onClick={handleEditPost}>Save</button>
-                        <button onClick={() => setIsEditing(false)}>Cancel</button>
-                    </div>
-                </>
-            }
+                        <input
+                            value={editFields.title}
+                            onChange={(e) =>
+                                setEditFields((prev) => ({
+                                    ...prev,
+                                    title: e.target.value,
+                                }))
+                            }
+                        />
+
+                        {editFields.hasImg && (
+                            <div className="edit-img">
+                                <img src={postImg} />
+                                <button
+                                    className="remove-image"
+                                    onClick={() =>
+                                        setEditFields((prev) => ({
+                                            ...prev,
+                                            hasImg: false,
+                                        }))
+                                    }
+                                >
+                                    Remove image
+                                </button>
+                            </div>
+                        )}
+
+                        <textarea
+                            rows="6"
+                            value={editFields.content}
+                            onChange={(e) =>
+                                setEditFields((prev) => ({
+                                    ...prev,
+                                    content: e.target.value,
+                                }))
+                            }
+                        />
+                        <input
+                            value={editFields.tags}
+                            onChange={(e) =>
+                                setEditFields((prev) => ({
+                                    ...prev,
+                                    tags: e.target.value,
+                                }))
+                            }
+                        />
+
+                        <div className="post-edit-actions">
+                            <button onClick={handleEditPost}>Save</button>
+                            <button onClick={() => setIsEditing(false)}>
+                                Cancel
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
 
             {!userData.isBlocked ? (
-                <>
-                    <div className="comment-form">
-                        <h3>Add a Comment</h3>
-                        <textarea
-                            placeholder="Write your comment..."
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            rows="8"
-                            cols="70"
-                        />
-                        <br />
-                        <button
-                            onClick={handleAddComment}
-                            disabled={submitting}
-                        >
-                            {submitting ? 'Posting...' : 'Submit Comment'}
-                        </button>
-                    </div>
-                </>
+                <div className="comment-form glassmorphic-bg">
+                    <p>Add a Comment</p>
+                    <textarea
+                        placeholder="Write your comment..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        rows="8"
+                        cols="70"
+                    />
+                    <button onClick={handleAddComment} disabled={submitting}>
+                        {submitting ? 'Posting...' : 'Submit Comment'}
+                    </button>
+                </div>
             ) : (
-                <p>You are blocked. You can't comment.</p>
+                <p className="comment-blocked">
+                    You are blocked. You can't comment.
+                </p>
             )}
-
-            <div className="comments-header">
-                <h3>Comments</h3>
-                <select
-                    className="comment-sort-select"
-                    value={sortCommentType}
-                    onChange={(e) => setSortCommentType(e.target.value)}
-                >
-                    <option value="newest">Sort by Newest</option>
-                    <option value="oldest">Sort by Oldest</option>
-                    <option value="mostLiked">Sort by Most Likes</option>
-                    <option value="leastLiked">Sort by Least Likes</option>
-                </select>
-            </div>
-
-            <div className="comments-section">
+            <div className="comments-section glassmorphic-bg">
+                <div className={`comment-edit-backdrop ${editingCommentId ? 'editing' : ''}`} onClick={() => setEditingCommentId(null)}></div>
+                <div className="comments-header">
+                    <p className="comments-section-title">Comments</p>
+                    <Select
+                        className="comment-sort-select"
+                        options={commentSortOptions}
+                        value={commentSortOptions.find(
+                            (opt) => opt.value === sortCommentType
+                        )}
+                        onChange={(opt) => setSortCommentType(opt.value)}
+                        isSearchable={false}
+                        styles={sortStyles}
+                        aria-label="Sort comments"
+                    />
+                </div>
                 {post.comments ? (
                     Object.entries(post.comments)
                         .sort(([, a], [, b]) => {
                             switch (sortCommentType) {
                                 case 'newest':
-                                    return new Date(b.createdOn) - new Date(a.createdOn);
+                                    return (
+                                        new Date(b.createdOn) -
+                                        new Date(a.createdOn)
+                                    );
                                 case 'oldest':
-                                    return new Date(a.createdOn) - new Date(b.createdOn);
+                                    return (
+                                        new Date(a.createdOn) -
+                                        new Date(b.createdOn)
+                                    );
                                 case 'mostLiked':
                                     return (b.likes || 0) - (a.likes || 0);
                                 case 'leastLiked':
@@ -494,21 +641,60 @@ export default function PostDetails() {
                             }
                         })
                         .map(([commentId, comment]) => (
-                            <div key={commentId} className="comment">
+                            <div
+                                key={commentId}
+                                className={`comment ${
+                                    editingCommentId === commentId
+                                        ? 'editing'
+                                        : ''
+                                }`}
+                            >
+                                {commentToDelete === commentId && (
+                                    <div className="comment-delete-confirm">
+                                        <div className="comment-delete">
+                                            <h1>
+                                                Are you sure you want to delete
+                                                this comment?
+                                            </h1>
+                                            <button
+                                                onClick={() =>
+                                                    handleDeleteComment(
+                                                        commentId
+                                                    )
+                                                }
+                                            >
+                                                Delete
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    setCommentToDelete(null)
+                                                }
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="comment-header">
-                                    <p>
-                                        <strong onClick={() => handleCommentAuthorLink(comment.author, commentId)} style={{ cursor: 'pointer' }}>
+                                    <p className="comment-author">
+                                        by{' '}
+                                        <strong
+                                            onClick={() =>
+                                                handleCommentAuthorLink(
+                                                    comment.author,
+                                                    commentId
+                                                )
+                                            }
+                                            style={{ cursor: 'pointer' }}
+                                        >
                                             {comment.author}
-                                        </strong>{' '}
-                                        — {new Date(comment.createdOn).toLocaleString()}
+                                        </strong>
                                     </p>
-
-                                    <button
-                                        className="comment-like-button"
-                                        onClick={() => handleToggleCommentLike(commentId)}
-                                    >
-                                        {likedComments[commentId] ? 'Unlike' : 'Like'}: {comment.likes || 0}
-                                    </button>
+                                    <p>
+                                        {new Date(
+                                            comment.createdOn
+                                        ).toLocaleString()}
+                                    </p>
                                 </div>
 
                                 {editingCommentId === commentId ? (
@@ -522,67 +708,88 @@ export default function PostDetails() {
                                                 )
                                             }
                                         />
-                                        <div className="comment-edit-save-cancel-buttons">
-                                            <button
-                                                onClick={() =>
-                                                    handleSaveCommentEdit(
+                                            <button className='comment-edit-button'
+                                                onClick={(e) =>
+                                                    handleSaveCommentEdit(e,
                                                         commentId
                                                     )
                                                 }
                                             >
                                                 Save
                                             </button>
-                                            <button
-                                                onClick={() =>
-                                                    setEditingCommentId(null)
-                                                }
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
                                     </div>
                                 ) : (
-                                    <p className="comment-content">
-                                        {comment.content}
-                                    </p>
-                                )}
-
-                                <hr />
-
-                                {comment.editedBy && (
-                                    <p>
-                                        <em>
-                                            Edited by: {comment.editedBy.handle}
-                                            {comment.editedBy.isAdmin
-                                                ? ' (admin)'
-                                                : ''}
-                                        </em>
-                                    </p>
-                                )}
-
-                                {(userData.handle === comment.author ||
-                                    userData.isAdmin) && (
-                                        <div className="comment-edit-save-cancel-buttons">
+                                    <>
+                                        <p className="comment-content">
+                                            {comment.content}
+                                        </p>
+                                        <div className="comment-details">
+                                            {comment.editedBy && (
+                                                <p className='comment-edited-by'>
+                                                    <em>
+                                                        Edited by:{' '}
+                                                        {
+                                                            comment.editedBy
+                                                                .handle
+                                                        }
+                                                        {comment.editedBy
+                                                            .isAdmin
+                                                            ? ' (admin)'
+                                                            : ''}
+                                                    </em>
+                                                </p>
+                                            )}
                                             <button
-                                                style={{ backgroundColor: 'red' }}
+                                                className={`comment-like-button ${
+                                                    likedComments[commentId]
+                                                        ? 'liked'
+                                                        : ''
+                                                }`}
                                                 onClick={() =>
-                                                    handleDeleteComment(commentId)
+                                                    handleToggleCommentLike(
+                                                        commentId
+                                                    )
                                                 }
                                             >
-                                                Delete
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setEditingCommentId(commentId);
-                                                    setEditCommentText(
-                                                        comment.content
-                                                    );
-                                                }}
-                                            >
-                                                Edit
+                                                {likedComments[commentId]
+                                                    ? 'Unlike'
+                                                    : 'Like'}
+                                                : {comment.likes || 0}
                                             </button>
                                         </div>
-                                    )}
+                                        {(userData.handle === comment.author ||
+                                            userData.isAdmin) && (
+                                            <div className="comment-details-actions">
+                                                <i className="fa-solid fa-ellipsis"></i>
+                                                <div className="action-buttons">
+                                                    <button
+                                                        className="comment-action-button"
+                                                        onClick={() =>
+                                                            setCommentToDelete(
+                                                                commentId
+                                                            )
+                                                        }
+                                                    >
+                                                        <i className="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                    <button
+                                                        className="comment-action-button"
+                                                        onClick={() => {
+                                                            setEditingCommentId(
+                                                                commentId
+                                                            );
+                                                            setEditCommentText(
+                                                                comment.content
+                                                            );
+                                                        }}
+                                                    >
+                                                        <i className="fa-solid fa-pen-to-square"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </div>
                         ))
                 ) : (

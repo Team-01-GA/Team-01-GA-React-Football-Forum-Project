@@ -1,7 +1,7 @@
 #root {
     display: flex;
     flex-direction: column;
-    width: 1500px;
+    width: 1200px;
     justify-self: center;
     overflow-y: auto;
     overflow-x: hidden;

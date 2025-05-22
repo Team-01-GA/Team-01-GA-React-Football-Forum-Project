@@ -29,7 +29,11 @@ function SearchResults() {
     const [sortBy, setSortBy] = useState({ value: 'date-desc', label: 'Newest first' });
 
     useEffect(() => {
-        setQuery(decodeURIComponent(rawQuery));
+        let normalisedQuery = rawQuery
+        if (normalisedQuery === undefined) {
+            normalisedQuery = ' ';
+        }
+        setQuery(decodeURIComponent(normalisedQuery));
     }, [rawQuery]);
 
     useEffect(() => {
