@@ -184,7 +184,9 @@ export default function AllPosts({ category = null }) {
                             )
                         )
                     ) : (
-                        <p>No posts available.</p>
+                        <p className="no-acc-content">
+                            No posts available. Try clearing filters.
+                        </p>
                     )}
                 </div>
             </div>

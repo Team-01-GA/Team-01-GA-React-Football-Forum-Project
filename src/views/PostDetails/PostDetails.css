@@ -1,166 +1,471 @@
+.post-details {
+    margin-top: 50px;
+}
+
+#delete-confirmation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 99;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#delete-confirmation div {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    gap: 10px;
+    opacity: 0;
+    animation: deleteFadeIn 0.5s ease forwards;
+
+    & h1 {
+        margin: 0;
+    }
+
+    & button {
+        padding: 20px 30px;
+        font-size: 1.5em;
+        border: none;
+        outline: none;
+        border-radius: 15px;
+        width: 70%;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+}
+
+#delete-confirmation button:hover {
+    width: 80%;
+}
+
+@keyframes deleteFadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.editing-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -10;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+}
+
+.editing-backdrop.editing {
+    background-color: rgb(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 1;
+    pointer-events: auto;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+#post-details-main.editing {
+    z-index: 1000;
+    outline: 2px solid white;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+    padding: 50px;
+    margin: 50px;
+    background-color: transparent;
+}
+
+#post-details-main input {
+    border: none;
+    outline: none;
+    padding: 10px;
+    border-radius: 15px;
+    width: 100%;
+    font-size: 1.2em;
+}
+
+.edit-img {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.remove-image {
+    border: none;
+    outline: none;
+    position: absolute;
+    padding: 10px 20px;
+    bottom: 20px;
+    right: 20px;
+    border: 1px solid black;
+    border-radius: 15px;
+    background-color: rgba(225, 218, 218, 0.504);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    font-size: 1.2em;
+    cursor: pointer;
+
+}
+
+#post-details-main textarea {
+    border: none;
+    outline: none;
+    padding: 10px;
+    border-radius: 15px;
+    width: 100%;
+}
+
+.post-edit-actions {
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+    width: 100%;
+}
+
+.post-edit-actions button {
+    border: none;
+    outline: none;
+    padding: 10px 20px;
+    border-radius: 15px;
+    background-color: rgb(225, 218, 218);
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.post-edit-actions button:hover {
+    padding: 10px 30px;
+}
+
+#post-details-main {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 15px;
+    position: relative;
+    outline: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.post-details-author-img,
+.post-details-author-placeholder {
+    height: 50px;
+    width: 50px;
+    background-color: antiquewhite;
+    border-radius: 50%;
+    align-self: center;
+    align-content: center;
+    justify-items: center;
+    background-size: cover;
+
+    & p {
+        margin: 0;
+        font-size: 1.2em;
+        color: rgb(54, 54, 54);
+    }
+}
+
+.post-details-author {
+    margin: 0;
+    font-size: 1.5em;
+    align-self: center;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.post-details-date {
+    font-style: italic;
+    padding-left: 10px;
+    border-left: 2px solid white;
+}
+
+.post-details-title {
+    margin: 0;
+    width: 85%;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+#post-details-main img {
+    aspect-ratio: auto;
+    max-height: 300px;
+}
+
+.post-details-content {
+    font-size: 1.1em;
+    width: 100%;
+}
+
+.post-details-details {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.post-details-details .post-details-detail {
+    background-color: rgb(225, 218, 218);
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
+    margin: 0;
+    outline: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.post-details-detail.likes:hover {
+    cursor: pointer;
+    outline: 3px solid rgba(252, 61, 39, 0.486);
+}
+
+.post-details-detail.likes.liked {
+    outline: 3px solid rgba(252, 61, 39, 0.486);
+}
+
+.post-details-detail.likes.liked:hover {
+    cursor: pointer;
+    outline: 3px solid transparent;
+}
+
+p.tags {
+    width: 100%;
+}
+
+.clickable-tag {
+    display: inline-block;
+    background-color: #e9e9e9;
+    color: #333;
+    padding: 2px 6px;
+    margin: 2px 4px 2px 0;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.clickable-tag:hover {
+    background-color: #d2d2d2;
+}
+
+.post-details-actions {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.post-details-actions i {
+    position: relative !important;
+    font-size: 2em;
+    margin: 0;
+    padding: 5px 7px;
+    border-radius: 50%;
+    color: white;
+    z-index: 2;
+}
+
+.post-details-actions i:hover + .action-buttons,
+.post-details-actions .action-buttons:hover {
+    opacity: 1;
+    transform: translateX(0%);
+}
+
+.post-details-actions .action-buttons {
+    display: flex;
+    gap: 10px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    z-index: 1;
+    position: relative;
+}
+
+.post-details-actions .action-buttons button {
+    border: none;
+    outline: none;
+    color: white;
+    padding: 0;
+    background-color: transparent;
+    border-bottom: 1px solid white;
+    cursor: pointer;
+}
+
 .comments-section {
-  width: 600px;
+    width: 600px;
 }
 
 .comment {
-  margin-bottom: 16px;
-  padding: 8px;
-  background-color: rgb(249, 134, 134);
-  border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 8px;
+    background-color: rgb(249, 134, 134);
+    border-radius: 8px;
 }
 
 .comment p {
-  margin: 4px 0;
+    margin: 4px 0;
 }
 
 .comments-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  width: 600px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    width: 600px;
 }
 
 .post-like-button {
-  background-color: rgb(69, 152, 253);
-  border-style: solid;
-  border: none;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 10px;
-  cursor: pointer;
+    background-color: rgb(69, 152, 253);
+    border-style: solid;
+    border: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 .post-delete-button {
-  background-color: rgb(233, 30, 12);
-  border-style: solid;
-  border: none;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 10px;
-  cursor: pointer;
+    background-color: rgb(233, 30, 12);
+    border-style: solid;
+    border: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 .post-edit-button {
-  margin-left: 10px;
-  background-color: rgb(75, 74, 74);
-  border-style: solid;
-  border: none;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 10px;
-  cursor: pointer;
+    margin-left: 10px;
+    background-color: rgb(75, 74, 74);
+    border-style: solid;
+    border: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 .edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 600px;
-  width: 100%;
-  margin-bottom: 32px;
-  padding: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 32px;
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
 }
 
 .edit-form label {
-  font-weight: bold;
-  color: black;
+    font-weight: bold;
+    color: black;
 }
 
 .edit-form input,
 .edit-form textarea {
-  font-size: 16px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+    font-size: 16px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .edit-form button {
-  width: fit-content;
-  padding: 8px 12px;
-  margin-top: 8px;
+    width: fit-content;
+    padding: 8px 12px;
+    margin-top: 8px;
 }
 
 .comment p {
-  margin: 4px 0;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: pre-wrap;
+    margin: 4px 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
 }
 
-
 .comment-edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .comment-edit-form textarea {
-  font-size: 16px;
-  padding: 8px;
-  resize: vertical;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  min-height: 80px;
+    font-size: 16px;
+    padding: 8px;
+    resize: vertical;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-height: 80px;
 }
 
 .comment-edit-save-cancel-buttons {
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 }
 
 .comment-edit-save-cancel-buttons button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  background-color: #007bff;
-  color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
 }
 
 .comment-edit-save-cancel-buttons button:last-child {
-  background-color: #6c757d;
+    background-color: #6c757d;
 }
 
 .comment-content {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
 }
 
 .comment-like-button {
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  padding: 4px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 14px;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
 }

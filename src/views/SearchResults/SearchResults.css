@@ -64,6 +64,7 @@
     align-items: start;
     justify-content: space-between;
     width: 100%;
+    min-height: 500px;
 }
 
 .search-results-container {

@@ -1,7 +1,6 @@
 .post-row {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     background-color: rgba(0, 0, 0, 0.3);
     color: white;
     padding: 20px;
@@ -27,6 +26,39 @@
 .post-row:hover {
     opacity: 0.8;
     outline: 3px solid rgb(225, 218, 218);
+}
+
+.post-row div {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.post-row-column {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: start;
+    width: calc(50% - 20px);
+}
+
+.post-row-column:nth-of-type(2) {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: end;
+    width: calc(50% - 20px);
+}
+
+.post-row-column img {
+    max-height: 200px;
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    object-fit: cover;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .post-row-author:hover {
@@ -55,9 +87,11 @@
     margin-bottom: 10px;
 }
 
-.post-row-details {
+.post-row .post-row-details {
     width: 100%;
     display: flex;
+    flex-direction: row;
+    align-items: start;
     gap: 10px;
 }
 

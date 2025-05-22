@@ -10,6 +10,7 @@
 #all-posts-wrapper {
     padding: 20px;
     border-radius: 15px;
+    min-height: 500px;
 }
 
 #all-posts-wrapper button {
