@@ -3,8 +3,10 @@ import { getAuth } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 import { getStorage } from "firebase/storage";
 
+const API_KEY = import.meta.env.VITE_API_KEY;
+
 const firebaseConfig = {
-    apiKey: 'AIzaSyA-RRsqP8VEPvYbmyHkH46e1p7gmca01EM',
+    apiKey: API_KEY,
 
     authDomain: 'react-football-forum-app.firebaseapp.com',
 
